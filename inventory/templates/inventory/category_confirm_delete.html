@@ -1,0 +1,27 @@
+{% extends "inventory/base_admin.html" %}
+
+{% block title %}Delete Category - Sidewalk & Refreshments{% endblock %}
+{% block eyebrow %}Organization{% endblock %}
+{% block page_title %}Delete Category{% endblock %}
+{% block page_subtitle %}<div class="page-subtitle">This action removes the category permanently if nothing is linked to it.</div>{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'category_list' %}" class="btn btn-soft">Back to Categories</a>
+{% endblock %}
+
+{% block content %}
+  <div class="panel" style="max-width:720px;">
+    <div class="panel-header">
+      <div class="panel-title">Delete "{{ category.name }}"?</div>
+    </div>
+    <div style="padding:20px;">
+      <div class="message warning">Make sure this category is no longer linked to menu or inventory items before deleting it.</div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="actions">
+          <a href="{% url 'category_list' %}" class="btn btn-soft">Cancel</a>
+          <button type="submit" class="btn btn-danger">Delete Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

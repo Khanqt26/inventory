@@ -1,0 +1,56 @@
+{% extends "inventory/base_admin.html" %}
+
+{% block title %}{% if action == 'create' %}Add Inventory Item{% else %}Edit Inventory Item{% endif %}{% endblock %}
+{% block eyebrow %}Stock Records{% endblock %}
+{% block page_title %}{% if action == 'create' %}Add Inventory Item{% else %}Edit Inventory Item{% endif %}{% endblock %}
+{% block page_subtitle %}<div class="page-subtitle">Capture the item name, category, unit, and stock thresholds.</div>{% endblock %}
+{% block topbar_actions %}
+  <a href="{% if item %}{% url 'inventory_detail' item.id %}{% else %}{% url 'inventory_list' %}{% endif %}" class="btn btn-soft">Cancel</a>
+{% endblock %}
+
+{% block content %}
+  <div class="panel" style="max-width:760px;">
+    <div class="panel-header">
+      <div class="panel-title">{% if action == 'create' %}Item Information{% else %}Update Item Information{% endif %}</div>
+    </div>
+    <div style="padding:20px;">
+      <form method="post">
+        {% csrf_token %}
+        <div class="field">
+          <label for="name">Item Name</label>
+          <input id="name" name="name" type="text" value="{{ item.name|default:'' }}" required>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+              <option value="">Select category</option>
+              {% for category in categories %}
+                <option value="{{ category.id }}" {% if item.category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field">
+            <label for="unit">Unit</label>
+            <input id="unit" name="unit" type="text" value="{{ item.unit|default:'' }}" placeholder="pcs, bottles, kg" required>
+          </div>
+        </div>
+        <div class="form-grid">
+          {% if action == 'create' %}
+            <div class="field">
+              <label for="quantity">Initial Quantity</label>
+              <input id="quantity" name="quantity" type="number" step="0.01" min="0" value="{{ item.quantity|default:'0' }}">
+            </div>
+          {% endif %}
+          <div class="field">
+            <label for="reorder_threshold">Reorder Threshold</label>
+            <input id="reorder_threshold" name="reorder_threshold" type="number" step="0.01" min="0" value="{{ item.reorder_threshold|default:'10' }}">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">{% if action == 'create' %}Create Item{% else %}Save Changes{% endif %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

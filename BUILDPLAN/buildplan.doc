@@ -1,0 +1,230 @@
+# Sidewalk and Refreshments - Inventory System Build Plan
+## Developer Checklist
+
+**Project:** Sidewalk Inventory System (Django)
+**Location:** Dinagat Island
+**Last Updated:** April 19, 2026
+
+> **How to use this checklist:** Work through phases in order. Check off each item as it's completed. Do not proceed to the next phase until all items in the current phase are done.
+
+---
+
+## PHASE 0 - Environment Fix (Do This First!)
+
+> The `ImportError: Couldn't import Django` error must be resolved before anything else.
+
+- [ ] Open terminal in project root (`restaurant_inventory/`)
+- [ ] Activate virtual environment:
+  - Windows: `.venv\Scripts\activate`
+  - Mac/Linux: `source .venv/bin/activate`
+- [ ] Confirm Django is installed: `pip show django`
+- [ ] If not installed: `pip install django`
+- [x] Run check: `python manage.py check` - should return **System check identified no issues**
+- [x] Run dev server: `python manage.py runserver` - confirm it starts without errors
+- [x] Create a `requirements.txt`: `pip freeze > requirements.txt`
+
+---
+
+## PHASE 1 - Project Structure & Configuration
+
+- [x] Verify `config/settings.py` has correct `INSTALLED_APPS` (includes `inventory`)
+- [x] Verify `DATABASES` is configured (SQLite default is fine for MVP)
+- [x] Set `DEBUG = True` for development, document plan to set `False` for production
+- [x] Set `ALLOWED_HOSTS` appropriately (e.g., `['localhost', '127.0.0.1']`)
+- [x] Confirm `urls.py` at project level routes to `inventory` app URLs
+- [x] Confirm `inventory/urls.py` exists and has all routes defined
+- [x] Confirm `templates/inventory/` folder structure matches Django template loader config
+- [x] Run `python manage.py migrate` - all migrations applied cleanly
+
+---
+
+## PHASE 2 - Data Models
+
+- [x] **Category model** - fields: `name`, `slug` (optional), `created_at`
+- [x] **InventoryItem model** - fields: `name`, `category (FK)`, `unit`, `quantity`, `reorder_threshold`, `created_at`, `updated_at`
+- [x] **StockTransaction model** - fields: `item (FK)`, `transaction_type (in/out)`, `quantity`, `date`, `note`, `created_at`
+- [x] **MenuItem model** - fields: `name`, `description`, `price`, `category`, `is_available`, `linked_item (FK nullable)`
+- [x] Add `__str__` methods to all models
+- [x] Add `is_low_stock` property to `InventoryItem` (returns `True` if `quantity <= reorder_threshold`)
+- [x] Create and apply migrations: `python manage.py makemigrations && python manage.py migrate`
+- [x] Register all models in `admin.py`
+- [x] Seed at least 5 test items via Django admin or fixture
+
+---
+
+## PHASE 3 - Authentication
+
+- [x] Confirm Django's built-in auth is in `INSTALLED_APPS` (`django.contrib.auth`)
+- [x] Create login URL: `path('login/', ...)` using `django.contrib.auth.views.LoginView`
+- [x] Create logout URL: `path('logout/', ...)` using `django.contrib.auth.views.LogoutView`
+- [x] Create `login.html` template (styled to match site)
+- [x] Add `@login_required` decorator to all inventory/dashboard views
+- [x] Set `LOGIN_URL` in `settings.py` to `/login/`
+- [x] Set `LOGIN_REDIRECT_URL` to `/dashboard/`
+- [x] Create superuser: `python manage.py createsuperuser`
+- [x] Test: unauthenticated visit to `/dashboard/` redirects to `/login/`
+- [x] Test: successful login redirects to `/dashboard/`
+- [x] Test: logout redirects to `/login/` or home
+
+---
+
+## PHASE 4 - Category Management
+
+- [x] `CategoryListView` - list all categories
+- [x] `CategoryCreateView` - form to add new category
+- [x] `CategoryUpdateView` - form to edit category name
+- [x] `CategoryDeleteView` - confirm and delete (block if items are linked)
+- [x] URL routes wired for all category views
+- [x] Templates created for list, create, update, delete
+- [x] Navigation link to categories in sidebar/menu
+- [x] Test: create a category -> appears in list
+- [x] Test: rename a category -> updates on item views
+- [x] Test: delete category with items -> shows error or reassigns items
+
+---
+
+## PHASE 5 - Inventory Item Management
+
+- [x] `InventoryListView` - paginated list, filterable by category, shows low-stock badge
+- [x] `InventoryDetailView` - item detail with transaction history
+- [x] `InventoryCreateView` - form with all item fields
+- [x] `InventoryUpdateView` - edit existing item
+- [x] `InventoryDeleteView` - confirm before deleting
+- [x] URL routes wired for all item views
+- [x] Templates created for all views
+- [x] Category filter on list view (dropdown or tab)
+- [x] Low-stock badge (e.g., red label) shown on list when `is_low_stock` is `True`
+- [x] Test: add item -> appears in list with correct quantity
+- [x] Test: edit item -> changes saved correctly
+- [x] Test: filter by category -> only correct items shown
+- [x] Test: set quantity below threshold -> low-stock badge appears
+
+---
+
+## PHASE 6 - Stock Transaction Recording
+
+- [x] `StockInView` - form to record stock added (item, quantity, date, note)
+- [x] `StockOutView` - form to record stock used/removed
+- [x] On save: update `InventoryItem.quantity` atomically (use `F()` expressions to avoid race conditions)
+- [x] Prevent stock-out that would result in negative quantity - show validation error
+- [x] `TransactionHistoryView` - list transactions for a specific item
+- [x] URL routes wired
+- [x] Templates created
+- [x] Test: stock-in increases quantity correctly
+- [x] Test: stock-out decreases quantity correctly
+- [x] Test: stock-out beyond available quantity is blocked
+- [x] Test: transactions appear in history view
+
+---
+
+## PHASE 7 - Dashboard
+
+- [x] `DashboardView` - requires login
+- [x] Display: total item count
+- [x] Display: count of low-stock items
+- [x] Display: list of low-stock items with links to detail view
+- [x] Display: last 10 stock transactions (across all items)
+- [x] Quick links: Inventory, Menu, Customer View
+- [x] Template created: `dashboard.html`
+- [x] Test: dashboard loads without errors
+- [x] Test: low-stock count matches actual items below threshold
+- [x] Test: recent transactions list is accurate
+
+---
+
+## PHASE 8 - Menu Management
+
+- [x] `MenuListView` - admin view of all menu items
+- [x] `MenuCreateView` - form to add menu item
+- [x] `MenuUpdateView` - edit menu item
+- [x] `MenuDeleteView` - confirm delete
+- [x] `CustomerMenuView` - public page at `/customer/` (no login required)
+- [x] Customer view filterable by category
+- [x] URL routes wired (ensure `/customer/` is outside `@login_required`)
+- [x] Templates: `menu.html` (admin), `customer_menu.html` (public)
+- [x] Test: add menu item -> appears in customer view
+- [x] Test: `/customer/` accessible without logging in
+- [x] Test: filter by category on customer page works
+
+---
+
+## PHASE 9 - UI Polish & Navigation
+
+- [x] Consistent base template (`base.html`) used across all pages
+- [x] Navigation sidebar or header with links to: Dashboard, Inventory, Categories, Menu, Customer View, Logout
+- [x] Active link highlighted in navigation
+- [x] Mobile-friendly layout (basic responsive CSS or Bootstrap)
+- [x] Success/error flash messages on all create/update/delete actions
+- [x] Confirm modals or confirmation pages for all delete actions
+- [x] 404 and 500 error pages customized
+- [x] Low-stock items visually distinct (color, icon, or badge)
+- [x] Favicon added (fix the 404 error visible in terminal)
+
+---
+
+## PHASE 10 - Testing & QA
+
+- [x] Manual test: full flow - add category -> add item -> add stock -> use stock -> check dashboard
+- [x] Manual test: low stock alert fires correctly
+- [x] Manual test: customer menu page is accessible without login
+- [x] Manual test: all forms show validation errors on bad input
+- [x] Manual test: no negative quantities possible
+- [x] Check Django system: `python manage.py check --deploy` (review warnings)
+- [x] Review all `TODO` and `# FIXME` comments in codebase
+- [x] Check for hardcoded secrets in `settings.py` - move to `.env` file
+- [x] Confirm `db.sqlite3` is in `.gitignore`
+- [x] Confirm `.venv/` is in `.gitignore`
+
+---
+
+## PHASE 11 - Deployment (Local / Network)
+
+- [ ] Decide hosting: local machine, local network, or VPS
+- [ ] Set `DEBUG = False` in production settings
+- [ ] Set a strong `SECRET_KEY` (use environment variable)
+- [ ] Configure `ALLOWED_HOSTS` with actual server IP or domain
+- [ ] Run `python manage.py collectstatic` (if serving static files)
+- [ ] Set up a process manager (e.g., `gunicorn` + `supervisor`, or just run with `nohup` for simple local deploy)
+- [ ] Test production server starts cleanly
+- [ ] Set up daily backup of `db.sqlite3` (cron job or manual schedule)
+- [ ] Document server start/stop instructions for the owner
+
+---
+
+## PHASE 12 - Handover
+
+- [ ] Write a 1-page owner's guide: how to log in, add stock, record usage, read dashboard
+- [ ] Train owner on the system (walkthrough session)
+- [ ] Confirm owner can create a backup manually
+- [ ] Document how to restart the server if it goes down
+- [ ] Leave emergency contact/support instructions
+
+---
+
+## Quick Reference: Common Commands
+
+```bash
+# Activate virtual environment
+.venv\Scripts\activate          # Windows
+source .venv/bin/activate       # Mac/Linux
+
+# Run development server
+python manage.py runserver
+
+# Apply database migrations
+python manage.py makemigrations
+python manage.py migrate
+
+# Create admin user
+python manage.py createsuperuser
+
+# Check for issues
+python manage.py check
+
+# Save dependencies
+pip freeze > requirements.txt
+```
+
+---
+
+*Build plan generated for Sidewalk and Refreshments Inventory System - Dinagat Island*

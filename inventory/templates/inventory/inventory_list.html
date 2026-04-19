@@ -1,0 +1,80 @@
+{% extends "inventory/base_admin.html" %}
+
+{% block title %}Inventory - Sidewalk & Refreshments{% endblock %}
+{% block eyebrow %}Stock Records{% endblock %}
+{% block page_title %}Inventory{% endblock %}
+{% block page_subtitle %}<div class="page-subtitle">Manage stock levels, reorder thresholds, and item details.</div>{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'inventory_create' %}" class="btn btn-primary">Add Item</a>
+{% endblock %}
+
+{% block content %}
+  <form method="get" class="panel" style="padding:18px;margin-bottom:16px;display:grid;grid-template-columns:1fr 220px auto;gap:12px;">
+    <div class="field" style="margin-bottom:0;">
+      <label for="search">Search</label>
+      <input id="search" type="text" name="search" value="{{ search_query }}" placeholder="Search inventory items">
+    </div>
+    <div class="field" style="margin-bottom:0;">
+      <label for="category">Category</label>
+      <select id="category" name="category">
+        <option value="">All categories</option>
+        {% for category in categories %}
+          <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="actions" style="align-items:end;">
+      <button class="btn btn-primary" type="submit">Apply Filters</button>
+    </div>
+  </form>
+
+  <div class="muted" style="margin-bottom:12px;">Showing {{ items|length }} item{{ items|length|pluralize }} on this page. Low stock matches: {{ low_stock_count }}.</div>
+
+  <div class="panel" style="overflow:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Category</th>
+          <th>Unit</th>
+          <th>Quantity</th>
+          <th>Threshold</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td><strong>{{ item.name }}</strong><br><span class="muted">Updated {{ item.updated_at|date:"M d, Y H:i" }}</span></td>
+            <td>{{ item.category.name|default:"Uncategorized" }}</td>
+            <td>{{ item.unit }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.reorder_threshold }}</td>
+            <td>{% if item.is_low_stock %}<span class="badge badge-low">Low Stock</span>{% else %}<span class="badge badge-ok">Healthy</span>{% endif %}</td>
+            <td class="actions">
+              <a class="btn btn-soft" href="{% url 'inventory_detail' item.id %}">View</a>
+              <a class="btn btn-soft" href="{% url 'inventory_update' item.id %}">Edit</a>
+              <a class="btn btn-danger" href="{% url 'inventory_delete' item.id %}">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="muted">No inventory items found yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if page_obj.has_other_pages %}
+      <div class="actions" style="justify-content:flex-end;padding:16px;">
+        {% if page_obj.has_previous %}
+          <a class="btn btn-soft" href="?search={{ search_query }}&category={{ selected_category }}&page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span class="btn btn-soft">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a class="btn btn-soft" href="?search={{ search_query }}&category={{ selected_category }}&page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

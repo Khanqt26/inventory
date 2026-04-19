@@ -1,0 +1,203 @@
+# Sidewalk and Refreshments — Inventory System
+## MVP Feature List & Product Requirements Document (PRD)
+
+**Business:** Sidewalk and Refreshments
+**Location:** Dinagat Island
+**System:** Restaurant Inventory Management (Django)
+**Date:** April 19, 2026
+
+---
+
+# PART 1: MVP FEATURE LIST
+
+The Minimum Viable Product focuses on core inventory operations that directly support daily restaurant operations.
+
+---
+
+## MVP Feature Scope
+
+### 1. Item/Product Management
+- Add, edit, and delete inventory items (food, beverages, supplies)
+- Set item name, category, unit of measurement, and reorder threshold
+- View full item list with current stock levels
+
+### 2. Category Management
+- Create and manage categories (e.g., Drinks, Food, Condiments, Packaging)
+- Filter inventory view by category
+
+### 3. Stock Tracking
+- Record stock-in (restocking/delivery)
+- Record stock-out (consumption/usage)
+- View current quantity on hand per item
+
+### 4. Low Stock Alerts
+- Flag items that fall below the reorder threshold
+- Display alert/warning on the dashboard
+
+### 5. Basic Dashboard
+- Summary view: total items, low-stock count, recent activity
+- Quick navigation to core sections (Inventory, Menu, Customer view)
+
+### 6. Menu Integration
+- Link inventory items to menu items
+- Support customer-facing menu page (`/customer/`)
+
+### 7. User Access
+- Single admin login (no multi-role for MVP)
+- Protected routes — unauthenticated users cannot access admin views
+
+---
+
+## Out of Scope for MVP
+- Supplier management
+- Purchase order generation
+- Multi-user roles (cashier, manager, etc.)
+- Sales/POS integration
+- Automated reorder requests
+- Reporting and analytics
+- Mobile app
+
+---
+
+# PART 2: PRODUCT REQUIREMENTS DOCUMENT (PRD)
+
+---
+
+## 1. Overview
+
+**Product Name:** Sidewalk Inventory System
+**Type:** Internal web application (Django)
+**Primary User:** Restaurant owner / manager
+**Goal:** Maintain accurate, real-time inventory records for Sidewalk and Refreshments to minimize stockouts and reduce waste.
+
+---
+
+## 2. Problem Statement
+
+Sidewalk and Refreshments operates in Dinagat Island, where supply chain logistics can be challenging. Manual tracking of inventory leads to stockouts, over-ordering, and operational inefficiency. The system must give the owner a clear, reliable picture of stock at all times.
+
+---
+
+## 3. Goals & Success Metrics
+
+| Goal | Success Metric |
+|------|---------------|
+| Reduce stockouts | Low-stock alerts fired before item runs out 90% of the time |
+| Accurate stock count | Inventory count matches physical count within ±5% weekly |
+| Ease of use | Owner can log a stock transaction in under 60 seconds |
+| System reliability | Uptime ≥ 99% during business hours |
+
+---
+
+## 4. User Personas
+
+**Primary — The Owner/Manager**
+- Non-technical user
+- Logs in daily to check inventory and record deliveries
+- Needs simple, fast interface on desktop or tablet
+
+**Secondary — Customers (read-only)**
+- Views the menu page (`/customer/`)
+- No account required; no inventory access
+
+---
+
+## 5. Functional Requirements
+
+### 5.1 Authentication
+| ID | Requirement |
+|----|-------------|
+| AUTH-01 | Admin user must log in with username and password |
+| AUTH-02 | All inventory/dashboard routes redirect to login if unauthenticated |
+| AUTH-03 | Logout clears session |
+
+### 5.2 Item Management
+| ID | Requirement |
+|----|-------------|
+| ITEM-01 | Admin can create an inventory item with: name, category, unit, current quantity, reorder threshold |
+| ITEM-02 | Admin can edit any field of an existing item |
+| ITEM-03 | Admin can delete an item (soft delete or confirmation modal) |
+| ITEM-04 | Items list is paginated or searchable if count exceeds 20 |
+
+### 5.3 Category Management
+| ID | Requirement |
+|----|-------------|
+| CAT-01 | Admin can create, rename, and delete categories |
+| CAT-02 | Inventory list can be filtered by category |
+| CAT-03 | Each item belongs to exactly one category |
+
+### 5.4 Stock Transactions
+| ID | Requirement |
+|----|-------------|
+| TXN-01 | Admin can record a stock-in event (quantity added, date, optional note) |
+| TXN-02 | Admin can record a stock-out event (quantity removed, date, optional note) |
+| TXN-03 | Each transaction updates the item's current quantity in real time |
+| TXN-04 | Transaction history is viewable per item |
+
+### 5.5 Low Stock Alerts
+| ID | Requirement |
+|----|-------------|
+| ALERT-01 | Items at or below their reorder threshold are flagged visually (e.g., red badge) |
+| ALERT-02 | Dashboard displays count of low-stock items |
+| ALERT-03 | Low-stock items section on dashboard lists the affected items |
+
+### 5.6 Dashboard
+| ID | Requirement |
+|----|-------------|
+| DASH-01 | Shows total number of inventory items |
+| DASH-02 | Shows number of low-stock items |
+| DASH-03 | Shows list of recent stock transactions (last 10) |
+| DASH-04 | Links to inventory list, menu management, and customer view |
+
+### 5.7 Menu & Customer View
+| ID | Requirement |
+|----|-------------|
+| MENU-01 | Admin can manage menu items (name, description, price, category) |
+| MENU-02 | Customer-facing page (`/customer/`) displays menu items |
+| MENU-03 | Customer page is public (no login required) |
+| MENU-04 | Menu items can optionally be linked to inventory items |
+
+---
+
+## 6. Non-Functional Requirements
+
+| Category | Requirement |
+|----------|-------------|
+| Performance | Pages load in under 2 seconds on a standard connection |
+| Security | Passwords hashed with Django's default PBKDF2; no plain-text storage |
+| Usability | UI navigable without training for a non-technical owner |
+| Compatibility | Works on Chrome and Firefox on desktop/tablet |
+| Data Integrity | No negative stock quantities allowed |
+| Backup | SQLite DB (`db.sqlite3`) backed up daily (manual or cron) |
+
+---
+
+## 7. Tech Stack (Existing)
+
+| Layer | Technology |
+|-------|-----------|
+| Backend | Django (Python) |
+| Database | SQLite (`db.sqlite3`) |
+| Frontend | HTML templates (Django templating) |
+| Environment | `.venv` virtual environment |
+| Config | `config/settings.py` |
+
+---
+
+## 8. Assumptions & Constraints
+
+- Single-user system for MVP (one admin account)
+- No internet-connected POS or supplier API integrations
+- Hosted locally or on a low-cost server (Dinagat Island connectivity considered)
+- Django must be properly installed in the virtual environment before running (`python manage.py runserver`)
+
+---
+
+## 9. Risks
+
+| Risk | Mitigation |
+|------|-----------|
+| Django not installed in venv (current error) | Activate venv, run `pip install django` |
+| Data loss from SQLite | Implement regular file-based backups |
+| Low internet reliability on island | Design for offline-capable or local network hosting |
+| Owner unfamiliarity with system | Add simple onboarding instructions or tooltips |

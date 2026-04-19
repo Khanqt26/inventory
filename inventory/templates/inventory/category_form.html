@@ -1,0 +1,30 @@
+{% extends "inventory/base_admin.html" %}
+
+{% block title %}{{ title }} - Sidewalk & Refreshments{% endblock %}
+{% block eyebrow %}Organization{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}<div class="page-subtitle">Create or rename a category used by your menu and inventory records.</div>{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'category_list' %}" class="btn btn-soft">Back to Categories</a>
+{% endblock %}
+
+{% block content %}
+  <div class="panel" style="max-width:720px;">
+    <div class="panel-header">
+      <div class="panel-title">{{ title }}</div>
+    </div>
+    <div style="padding:20px;">
+      <form method="post">
+        {% csrf_token %}
+        <div class="field">
+          <label for="name">Category Name</label>
+          <input id="name" name="name" type="text" value="{{ category.name|default:'' }}" placeholder="Drinks, Desserts, Supplies" required>
+        </div>
+        <div class="actions">
+          <a href="{% url 'category_list' %}" class="btn btn-soft">Cancel</a>
+          <button type="submit" class="btn btn-primary">{{ button_text }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

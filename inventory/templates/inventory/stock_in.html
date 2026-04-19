@@ -1,0 +1,43 @@
+{% extends "inventory/base_admin.html" %}
+
+{% block title %}Stock In - Sidewalk & Refreshments{% endblock %}
+{% block eyebrow %}Inventory Movement{% endblock %}
+{% block page_title %}Stock In{% endblock %}
+{% block page_subtitle %}<div class="page-subtitle">Record incoming deliveries, replenishment, and additional stock.</div>{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'dashboard' %}" class="btn btn-soft">Back to Dashboard</a>
+{% endblock %}
+
+{% block content %}
+  <div class="panel" style="max-width:720px;">
+    <div class="panel-header">
+      <div class="panel-title">Add Inventory</div>
+    </div>
+    <div style="padding:20px;">
+      <form method="post">
+        {% csrf_token %}
+        <div class="field">
+          <label for="id_item">Select Item</label>
+          <select name="item" id="id_item" required>
+            <option value="">Choose an inventory item</option>
+            {% for item in items %}
+              <option value="{{ item.id }}">{{ item.name }} ({{ item.quantity }} {{ item.unit }} available)</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="id_quantity">Quantity to Add</label>
+          <input type="number" name="quantity" id="id_quantity" step="0.01" min="0.01" required>
+        </div>
+        <div class="field">
+          <label for="id_note">Note</label>
+          <textarea name="note" id="id_note" placeholder="Supplier delivery, manual restock, emergency refill, and so on."></textarea>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">Save Stock In</button>
+          <a href="{% url 'inventory_list' %}" class="btn btn-soft">View Inventory</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

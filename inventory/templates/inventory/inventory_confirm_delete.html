@@ -1,0 +1,26 @@
+{% extends "inventory/base_admin.html" %}
+
+{% block title %}Delete {{ item.name }}{% endblock %}
+{% block eyebrow %}Stock Records{% endblock %}
+{% block page_title %}Delete {{ item.name }}?{% endblock %}
+{% block page_subtitle %}<div class="page-subtitle">Remove this inventory item if it is no longer needed in the system.</div>{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'inventory_detail' item.id %}" class="btn btn-soft">Cancel</a>
+{% endblock %}
+
+{% block content %}
+  <div class="panel" style="max-width:720px;">
+    <div class="panel-header">
+      <div class="panel-title">Confirm Deletion</div>
+    </div>
+    <div style="padding:20px;">
+      <div class="message warning">This action removes the item record. Review linked reports before deleting if you still need its history.</div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="actions">
+          <button type="submit" class="btn btn-danger">Delete Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

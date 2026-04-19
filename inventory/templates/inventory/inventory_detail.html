@@ -1,0 +1,59 @@
+{% extends "inventory/base_admin.html" %}
+
+{% block title %}{{ item.name }} - Inventory Detail{% endblock %}
+{% block eyebrow %}Stock Records{% endblock %}
+{% block page_title %}{{ item.name }}{% endblock %}
+{% block page_subtitle %}<div class="page-subtitle">{{ item.category.name|default:"Uncategorized" }} | Unit: {{ item.unit }}</div>{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'inventory_list' %}" class="btn btn-soft">Back to Inventory</a>
+  <a href="{% url 'inventory_update' item.id %}" class="btn btn-primary">Edit Item</a>
+{% endblock %}
+
+{% block content %}
+  <div style="display:grid;grid-template-columns:320px 1fr;gap:16px;">
+    <div class="panel" style="padding:20px;">
+      <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;">Current Quantity</div>
+      <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;margin-top:8px;">{{ item.quantity }}</div>
+      <div style="margin-top:14px;">
+        {% if item.is_low_stock %}
+          <span class="badge badge-low">Low Stock</span>
+        {% else %}
+          <span class="badge badge-ok">Healthy</span>
+        {% endif %}
+      </div>
+      <div class="muted" style="margin-top:16px;">Reorder threshold: {{ item.reorder_threshold }}</div>
+      <div class="muted" style="margin-top:6px;">Created: {{ item.created_at|date:"M d, Y H:i" }}</div>
+      <div class="muted" style="margin-top:6px;">Updated: {{ item.updated_at|date:"M d, Y H:i" }}</div>
+    </div>
+
+    <div class="panel" style="overflow:auto;">
+      <div class="panel-header">
+        <div class="panel-title">Recent Transactions</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Quantity</th>
+            <th>Note</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for transaction in transactions %}
+            <tr>
+              <td>{{ transaction.get_transaction_type_display }}</td>
+              <td>{{ transaction.quantity }}</td>
+              <td>{{ transaction.note|default:"-" }}</td>
+              <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4" class="muted">No transactions recorded for this item yet.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Sidewalk & Refreshments{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f9f2ef;
+    --sidebar-bg: #2a1212;
+    --surface: #ffffff;
+    --surface-soft: #fff8f6;
+    --border: #edd6d1;
+    --text: #241616;
+    --muted: #7f6767;
+    --accent: #9f2f2f;
+    --accent-dark: #7c2323;
+    --accent-soft: #fde9e9;
+    --warning: #c77d2c;
+    --warning-soft: #fff4e6;
+    --danger: #8d1616;
+    --danger-soft: #fdecec;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 18px 44px rgba(54, 22, 22, 0.08);
+    --sidebar-w: 248px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: linear-gradient(180deg, #fff8f6 0%, var(--bg) 100%);
+    color: var(--text);
+    font-family: "DM Sans", sans-serif;
+    min-height: 100vh;
+    display: flex;
+  }
+  .sidebar {
+    width: var(--sidebar-w);
+    background: radial-gradient(circle at top left, rgba(204, 88, 88, 0.22), transparent 34%), linear-gradient(180deg, #381616 0%, var(--sidebar-bg) 100%);
+    color: rgba(255,255,255,0.88);
+    position: fixed;
+    inset: 0 auto 0 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+  .sidebar-head { padding: 28px 22px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .logo-mark {
+    width: 42px; height: 42px; border-radius: 12px; background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-family: "Syne", sans-serif;
+    font-size: 18px; font-weight: 800; margin-bottom: 12px;
+  }
+  .brand-title { font-family: "Syne", sans-serif; font-size: 15px; font-weight: 700; line-height: 1.25; color: #fff; }
+  .brand-subtitle { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-top: 4px; }
+  .sidebar-scroll { flex: 1; overflow: auto; padding: 18px 12px 16px; }
+  .nav-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.32); padding: 12px 12px 8px; }
+  .nav-link, .logout-button {
+    width: 100%; border: 0; background: transparent; color: rgba(255,255,255,0.7); text-decoration: none;
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px;
+    font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; margin-bottom: 4px;
+    transition: background 0.14s ease, color 0.14s ease, transform 0.14s ease;
+  }
+  .nav-link:hover, .logout-button:hover { background: rgba(255,255,255,0.08); color: #fff; transform: translateX(2px); }
+  .nav-link.active { background: var(--accent); color: #fff; }
+  .nav-icon { width: 18px; text-align: center; flex-shrink: 0; }
+  .sidebar-foot { padding: 14px 12px 16px; border-top: 1px solid rgba(255,255,255,0.08); }
+  .user-card { padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,0.04); display: flex; gap: 12px; align-items: center; }
+  .user-avatar {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-weight: 700;
+  }
+  .user-name { font-size: 13px; font-weight: 600; color: #fff; }
+  .user-role { font-size: 11px; color: rgba(255,255,255,0.42); }
+  .main { margin-left: var(--sidebar-w); flex: 1; min-width: 0; }
+  .topbar {
+    position: sticky; top: 0; z-index: 5; background: rgba(252, 250, 245, 0.86); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border); padding: 18px 28px; display: flex; justify-content: space-between; gap: 16px; align-items: center;
+  }
+  .page-eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 4px; }
+  .page-title { font-family: "Syne", sans-serif; font-size: 24px; font-weight: 800; color: var(--text); }
+  .page-subtitle { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .topbar-actions, .actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .content { padding: 26px 28px 36px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text); text-decoration: none; font-size: 14px; font-weight: 600;
+  }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+  .btn-soft { background: var(--surface-soft); }
+  .btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .panel-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+  .panel-title { font-family: "Syne", sans-serif; font-size: 16px; font-weight: 700; }
+  .messages { margin-bottom: 18px; }
+  .message { padding: 13px 15px; border-radius: 12px; margin-bottom: 8px; font-size: 14px; font-weight: 500; }
+  .message.success { background: var(--accent-soft); color: var(--accent-dark); }
+  .message.error { background: var(--danger-soft); color: var(--danger); }
+  .message.warning { background: var(--warning-soft); color: var(--warning); }
+  .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); font: inherit;
+  }
+  .field textarea { min-height: 100px; resize: vertical; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 14px 16px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .badge { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .badge-ok { background: var(--accent-soft); color: var(--accent-dark); }
+  .badge-low { background: var(--warning-soft); color: var(--warning); }
+  .badge-danger { background: var(--danger-soft); color: var(--danger); }
+  .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+  .metric-card { padding: 18px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .metric-label { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .metric-value { font-family: "Syne", sans-serif; font-size: 30px; font-weight: 800; }
+  .muted { color: var(--muted); }
+  @media (max-width: 920px) {
+    .sidebar { position: static; width: 100%; }
+    body { display: block; }
+    .main { margin-left: 0; }
+    .topbar { position: static; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <div class="logo-mark">S</div>
+      <div class="brand-title">Sidewalk &<br>Refreshments</div>
+      <div class="brand-subtitle">Inventory System</div>
+    </div>
+    <div class="sidebar-scroll">
+      <div class="nav-label">Overview</div>
+      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><span class="nav-icon">▦</span><span>Dashboard</span></a>
+      <div class="nav-label">Management</div>
+      <a class="nav-link {% if request.resolver_match.url_name == 'inventory_list' or request.resolver_match.url_name == 'inventory_detail' or request.resolver_match.url_name == 'inventory_create' or request.resolver_match.url_name == 'inventory_update' or request.resolver_match.url_name == 'inventory_delete' %}active{% endif %}" href="{% url 'inventory_list' %}"><span class="nav-icon">◫</span><span>Inventory</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'stock_in' %}active{% endif %}" href="{% url 'stock_in' %}"><span class="nav-icon">＋</span><span>Stock In</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'stock_out' %}active{% endif %}" href="{% url 'stock_out' %}"><span class="nav-icon">－</span><span>Stock Out</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'transaction_history' or request.resolver_match.url_name == 'item_transaction_history' %}active{% endif %}" href="{% url 'transaction_history' %}"><span class="nav-icon">↺</span><span>Transactions</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'category_list' or request.resolver_match.url_name == 'category_create' or request.resolver_match.url_name == 'category_update' or request.resolver_match.url_name == 'category_delete' %}active{% endif %}" href="{% url 'category_list' %}"><span class="nav-icon">◆</span><span>Categories</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'menu_items' or request.resolver_match.url_name == 'menu' %}active{% endif %}" href="{% url 'menu_items' %}"><span class="nav-icon">☰</span><span>Menu</span></a>
+      <div class="nav-label">Public</div>
+      <a class="nav-link {% if request.resolver_match.url_name == 'customer_menu' %}active{% endif %}" href="{% url 'customer_menu' %}"><span class="nav-icon">⌂</span><span>Customer View</span></a>
+      <a class="nav-link" href="{% url 'admin:index' %}"><span class="nav-icon">⚙</span><span>Django Admin</span></a>
+    </div>
+    <div class="sidebar-foot">
+      <form method="post" action="{% url 'logout' %}" style="margin-bottom: 12px;">
+        {% csrf_token %}
+        <button type="submit" class="logout-button"><span class="nav-icon">⇠</span><span>Logout</span></button>
+      </form>
+      <div class="user-card">
+        <div class="user-avatar">{{ request.user.username|default:"A"|slice:":1"|upper }}</div>
+        <div>
+          <div class="user-name">{{ request.user.username|default:"Admin" }}</div>
+          <div class="user-role">{% if request.user.is_authenticated %}Authenticated session{% else %}Guest{% endif %}</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-eyebrow">{% block eyebrow %}Inventory Admin{% endblock %}</div>
+        <div class="page-title">{% block page_title %}Dashboard{% endblock %}</div>
+        {% block page_subtitle %}{% endblock %}
+      </div>
+      <div class="topbar-actions">{% block topbar_actions %}{% endblock %}</div>
+    </div>
+    <div class="content">
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% else %}success{% endif %}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</body>
+</html>

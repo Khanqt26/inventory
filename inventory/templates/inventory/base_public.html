@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Sidewalk & Refreshments{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f9f2ef; --surface:#ffffff; --border:#edd6d1; --text:#241616; --muted:#7f6767;
+    --accent:#9f2f2f; --accent-dark:#7c2323; --accent-soft:#fde9e9; --radius:16px; --shadow:0 18px 44px rgba(54,22,22,0.08);
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:linear-gradient(180deg, #fff8f6 0%, var(--bg) 100%); color:var(--text); font-family:"DM Sans",sans-serif; }
+  .hero { padding:28px 24px 12px; border-bottom:1px solid var(--border); background:rgba(255,255,255,0.5); backdrop-filter:blur(10px); }
+  .hero-inner { max-width:1180px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+  .brand { font-family:"Syne",sans-serif; font-size:28px; font-weight:800; }
+  .sub { color:var(--muted); margin-top:6px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 14px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); text-decoration:none; font-weight:600; }
+  .btn-primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .shell { max-width:1180px; margin:0 auto; padding:24px; }
+</style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="brand">Sidewalk & Refreshments</div>
+        <div class="sub">{% block hero_subtitle %}Fresh menu items and daily availability.{% endblock %}</div>
+      </div>
+      <div><a href="{% url 'login' %}" class="btn btn-primary">Admin Login</a></div>
+    </div>
+  </header>
+  <div class="shell">
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

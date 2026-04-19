@@ -1,0 +1,53 @@
+{% extends "inventory/base_admin.html" %}
+
+{% block title %}Menu Management - Sidewalk & Refreshments{% endblock %}
+{% block eyebrow %}Sales{% endblock %}
+{% block page_title %}Menu Items{% endblock %}
+{% block page_subtitle %}<div class="page-subtitle">Filter menu items by category and record orders against inventory.</div>{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'customer_menu' %}" class="btn btn-soft">Open Public Menu</a>
+{% endblock %}
+
+{% block content %}
+  <form method="get" class="panel" style="padding:18px;margin-bottom:16px;display:flex;gap:12px;align-items:end;flex-wrap:wrap;">
+    <div class="field" style="min-width:240px;margin-bottom:0;">
+      <label for="category">Category</label>
+      <select id="category" name="category">
+        <option value="">All Categories</option>
+        {% for category in categories %}
+          <option value="{{ category.id }}" {% if selected_category and selected_category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Apply Filter</button>
+  </form>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;">
+    {% for item in items %}
+      <div class="panel" style="overflow:hidden;">
+        <div style="height:180px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;">
+          {% if item.image %}
+            <img src="{{ item.image.url }}" alt="{{ item.name }}" style="width:100%;height:100%;object-fit:cover;">
+          {% else %}
+            <span style="font-size:48px;">☕</span>
+          {% endif %}
+        </div>
+        <div style="padding:18px;">
+          <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;">{{ item.name }}</div>
+          <div class="muted" style="margin-top:4px;">{{ item.category.name }}</div>
+          <div style="margin-top:10px;line-height:1.6;">{{ item.description|default:"No description yet." }}</div>
+          <div style="margin-top:14px;font-size:22px;font-weight:800;color:var(--accent);">PHP {{ item.price }}</div>
+          <form method="post" action="{% url 'order' item.id %}" style="margin-top:14px;display:flex;gap:10px;">
+            {% csrf_token %}
+            <input type="number" name="quantity" value="1" min="1" style="max-width:84px;">
+            <button type="submit" class="btn btn-primary" style="flex:1;">Record Order</button>
+          </form>
+        </div>
+      </div>
+    {% empty %}
+      <div class="panel" style="padding:24px;">
+        <div class="muted">No menu items found for this filter yet.</div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

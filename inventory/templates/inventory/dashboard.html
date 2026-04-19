@@ -1,0 +1,109 @@
+{% extends "inventory/base_admin.html" %}
+
+{% block title %}Dashboard - Sidewalk & Refreshments{% endblock %}
+{% block eyebrow %}Overview{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}<div class="page-subtitle">Monitor stock health, recent movements, and quick actions in one place.</div>{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'inventory_create' %}" class="btn btn-primary">Add Inventory Item</a>
+{% endblock %}
+
+{% block content %}
+  <div class="metric-grid">
+    <div class="metric-card">
+      <div class="metric-label">Total Sales</div>
+      <div class="metric-value">PHP {{ total_sales }}</div>
+      <div class="muted" style="margin-top:6px;">Combined recorded sales value.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Low Stock Items</div>
+      <div class="metric-value">{{ low_items|length }}</div>
+      <div class="muted" style="margin-top:6px;">Items at or below reorder level.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Total Inventory Items</div>
+      <div class="metric-value">{{ all_items|length }}</div>
+      <div class="muted" style="margin-top:6px;">Tracked stock records in the system.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Stock Health</div>
+      <div class="metric-value">{{ low_stock_percentage }}%</div>
+      <div class="muted" style="margin-top:6px;">Attention score based on low-stock count.</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;align-items:start;">
+    <div class="panel" style="overflow:auto;">
+      <div class="panel-header">
+        <div class="panel-title">Low Stock Inventory</div>
+        <a href="{% url 'inventory_list' %}" class="btn btn-soft">View All Inventory</a>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Category</th>
+            <th>Quantity</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in low_items %}
+            <tr>
+              <td><strong>{{ item.name }}</strong><br><span class="muted">{{ item.unit }}</span></td>
+              <td>{{ item.category.name|default:"Uncategorized" }}</td>
+              <td>{{ item.quantity }}</td>
+              <td><span class="badge badge-danger">Low Stock</span></td>
+              <td><a href="{% url 'restock_item' item.id %}" class="btn btn-primary">Restock +20</a></td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" class="muted">Everything looks healthy right now.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:grid;gap:16px;">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Quick Actions</div>
+        </div>
+        <div style="padding:18px;display:grid;gap:10px;">
+          <a href="{% url 'stock_in' %}" class="btn btn-soft">Record Stock In</a>
+          <a href="{% url 'stock_out' %}" class="btn btn-soft">Record Stock Out</a>
+          <a href="{% url 'menu_items' %}" class="btn btn-soft">Open Menu Management</a>
+          <a href="{% url 'customer_menu' %}" class="btn btn-soft">Preview Customer Menu</a>
+          <a href="{% url 'restock' %}" class="btn btn-primary">Restock All to 100</a>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Recent Transactions</div>
+          <a href="{% url 'transaction_history' %}" class="btn btn-soft">See Full History</a>
+        </div>
+        <div style="padding:18px;display:grid;gap:10px;">
+          {% for transaction in recent_transactions %}
+            <div style="padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface-soft);">
+              <div style="display:flex;justify-content:space-between;gap:12px;">
+                <strong>{{ transaction.item.name }}</strong>
+                <span class="badge {% if transaction.transaction_type == 'in' %}badge-ok{% else %}badge-low{% endif %}">
+                  {{ transaction.get_transaction_type_display }}
+                </span>
+              </div>
+              <div class="muted" style="margin-top:6px;">{{ transaction.quantity }} {{ transaction.item.unit }} | {{ transaction.created_at|date:"M d, Y H:i" }}</div>
+              {% if transaction.note %}
+                <div style="margin-top:6px;">{{ transaction.note }}</div>
+              {% endif %}
+            </div>
+          {% empty %}
+            <div class="muted">No transactions recorded yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

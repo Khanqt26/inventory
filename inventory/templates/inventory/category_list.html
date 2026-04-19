@@ -1,0 +1,28 @@
+{% extends "inventory/base_admin.html" %}
+
+{% block title %}Categories - Sidewalk & Refreshments{% endblock %}
+{% block eyebrow %}Organization{% endblock %}
+{% block page_title %}Categories{% endblock %}
+{% block page_subtitle %}<div class="page-subtitle">Organize inventory and menu items into clear groups.</div>{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'category_create' %}" class="btn btn-primary">Add Category</a>
+{% endblock %}
+
+{% block content %}
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;">
+    {% for category in categories %}
+      <div class="panel" style="padding:20px;">
+        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;">{{ category.name }}</div>
+        <div class="muted" style="margin-top:6px;">{{ category.menuitem_set.count }} menu item{{ category.menuitem_set.count|pluralize }}</div>
+        <div class="actions" style="margin-top:14px;">
+          <a href="{% url 'category_update' category.id %}" class="btn btn-soft">Edit</a>
+          <a href="{% url 'category_delete' category.id %}" class="btn btn-danger">Delete</a>
+        </div>
+      </div>
+    {% empty %}
+      <div class="panel" style="padding:24px;">
+        <div class="muted">No categories yet. Create your first one to organize the system.</div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}
