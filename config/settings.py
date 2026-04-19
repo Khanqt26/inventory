@@ -45,6 +45,10 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+# Allow Railway deployments
+if not DEBUG:
+    ALLOWED_HOSTS.extend([".up.railway.app", "*.railway.app"])
+
 
 # Application definition
 
