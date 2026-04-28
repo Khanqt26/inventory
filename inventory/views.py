@@ -1,13 +1,17 @@
-from datetime import timedelta
+﻿from datetime import timedelta
+from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, F, Sum
+from django.db.models.functions import TruncDate
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.timezone import now
+from django.utils.timezone import localdate, now
+from django.views.decorators.http import require_POST
 
+from .forms import CategoryForm, InventoryItemForm
 from .models import Category, InventoryItem, MenuItem, Recipe, Sale, StockTransaction
 
 
@@ -17,9 +21,13 @@ def menu_view(request):
 
 
 @login_required
+@require_POST
 def order_item(request, item_id):
     menu_item = get_object_or_404(MenuItem, id=item_id)
     recipes = Recipe.objects.filter(menu_item=menu_item).select_related("item")
+
+    next_url = request.POST.get("next")
+    redirect_target = next_url if next_url and next_url.startswith("/") else "menu_items"
 
     try:
         quantity = max(1, int(request.POST.get("quantity", 1)))
@@ -33,7 +41,7 @@ def order_item(request, item_id):
                 request,
                 f"Not enough {recipe.item.name} for {quantity} x {menu_item.name}.",
             )
-            return redirect("menu_items")
+            return redirect(redirect_target)
 
     with transaction.atomic():
         for recipe in recipes:
@@ -49,7 +57,7 @@ def order_item(request, item_id):
                     request,
                     f"Not enough {item.name} for {quantity} x {menu_item.name}.",
                 )
-                return redirect("menu_items")
+                return redirect(redirect_target)
 
             StockTransaction.objects.create(
                 item=item,
@@ -65,7 +73,7 @@ def order_item(request, item_id):
         )
 
     messages.success(request, f"{quantity} x {menu_item.name} ordered successfully.")
-    return redirect("menu_items")
+    return redirect(redirect_target)
 
 
 @login_required
@@ -76,21 +84,26 @@ def dashboard(request):
     low_stock_percentage = min(100, len(low_items) * 20) if all_items else 0
     recent_transactions = StockTransaction.objects.select_related("item").order_by("-created_at")[:10]
 
-    today = now().date()
-    days = []
-    sales_data = []
-
-    for i in range(6, -1, -1):
-        day = today - timedelta(days=i)
-        total = Sale.objects.filter(created_at__date=day).aggregate(total=Sum("total_price"))["total"] or 0
-        days.append(day.strftime("%b %d"))
-        sales_data.append(float(total))
+    today = localdate()
+    day_keys = [today - timedelta(days=i) for i in range(6, -1, -1)]
+    grouped_sales = {
+        row["day"]: float(row["total"])
+        for row in (
+            Sale.objects.filter(created_at__date__gte=day_keys[0], created_at__date__lte=day_keys[-1])
+            .annotate(day=TruncDate("created_at"))
+            .values("day")
+            .annotate(total=Sum("total_price"))
+        )
+    }
+    days = [day.strftime("%b %d") for day in day_keys]
+    sales_data = [grouped_sales.get(day, 0.0) for day in day_keys]
 
     top_items = (
         Sale.objects.values("menu_item__name")
         .annotate(total_sold=Count("id"))
         .order_by("-total_sold")[:5]
     )
+    menu_items = MenuItem.objects.select_related("category").order_by("name")
 
     return render(
         request,
@@ -104,16 +117,18 @@ def dashboard(request):
             "days": days,
             "sales_data": sales_data,
             "top_items": top_items,
+            "menu_items": menu_items,
         },
     )
 
 
 @login_required
+@require_POST
 def restock_all(request):
     with transaction.atomic():
         for item in InventoryItem.objects.all():
-            added_quantity = max(0, 100 - item.quantity)
-            InventoryItem.objects.filter(id=item.id).update(quantity=100, updated_at=now())
+            added_quantity = max(Decimal("0"), Decimal("100") - item.quantity)
+            InventoryItem.objects.filter(id=item.id).update(quantity=Decimal("100"), updated_at=now())
 
             if added_quantity:
                 StockTransaction.objects.create(
@@ -128,14 +143,15 @@ def restock_all(request):
 
 
 @login_required
+@require_POST
 def restock_item(request, item_id):
     item = get_object_or_404(InventoryItem, id=item_id)
-    InventoryItem.objects.filter(id=item.id).update(quantity=F("quantity") + 20, updated_at=now())
+    InventoryItem.objects.filter(id=item.id).update(quantity=F("quantity") + Decimal("20"), updated_at=now())
 
     StockTransaction.objects.create(
         item=item,
         transaction_type="in",
-        quantity=20,
+        quantity=Decimal("20"),
         note="Individual restock",
     )
 
@@ -147,7 +163,11 @@ def restock_item(request, item_id):
 def stock_in(request):
     if request.method == "POST":
         item = get_object_or_404(InventoryItem, id=request.POST.get("item"))
-        quantity = float(request.POST.get("quantity", 0))
+        try:
+            quantity = Decimal(str(request.POST.get("quantity", "0")))
+        except (TypeError, ValueError, InvalidOperation):
+            messages.error(request, "Stock-in quantity must be a valid number.")
+            return redirect("stock_in")
         note = request.POST.get("note", "")
 
         if quantity <= 0:
@@ -175,7 +195,11 @@ def stock_in(request):
 def stock_out(request):
     if request.method == "POST":
         item = get_object_or_404(InventoryItem, id=request.POST.get("item"))
-        quantity = float(request.POST.get("quantity", 0))
+        try:
+            quantity = Decimal(str(request.POST.get("quantity", "0")))
+        except (TypeError, ValueError, InvalidOperation):
+            messages.error(request, "Stock-out quantity must be a valid number.")
+            return redirect("stock_out")
         note = request.POST.get("note", "")
 
         if quantity <= 0:
@@ -213,10 +237,10 @@ def transaction_history(request, item_id=None):
 
     if item_id:
         item = get_object_or_404(InventoryItem, id=item_id)
-        transactions = StockTransaction.objects.filter(item=item).order_by("-date")
+        transactions = StockTransaction.objects.filter(item=item).order_by("-created_at")
         title = f"Transaction History - {item.name}"
     else:
-        transactions = StockTransaction.objects.select_related("item").order_by("-date")[:50]
+        transactions = StockTransaction.objects.select_related("item").order_by("-created_at")[:50]
         title = "Recent Transactions"
 
     return render(
@@ -287,13 +311,13 @@ def category_list(request):
 
 @login_required
 def category_create(request):
+    form = CategoryForm(request.POST or None)
     if request.method == "POST":
-        name = (request.POST.get("name") or "").strip()
-        if name:
-            Category.objects.create(name=name)
-            messages.success(request, f'Category "{name}" created successfully.')
+        if form.is_valid():
+            category = form.save()
+            messages.success(request, f'Category "{category.name}" created successfully.')
             return redirect("category_list")
-        messages.error(request, "Category name is required.")
+        messages.error(request, form.errors.as_text())
 
     return render(
         request,
@@ -301,6 +325,7 @@ def category_create(request):
         {
             "title": "Create Category",
             "button_text": "Create Category",
+            "category": form.instance if form.instance.pk else None,
         },
     )
 
@@ -308,15 +333,14 @@ def category_create(request):
 @login_required
 def category_update(request, category_id):
     category = get_object_or_404(Category, id=category_id)
+    form = CategoryForm(request.POST or None, instance=category)
 
     if request.method == "POST":
-        name = (request.POST.get("name") or "").strip()
-        if name:
-            category.name = name
-            category.save()
-            messages.success(request, f'Category "{name}" updated successfully.')
+        if form.is_valid():
+            category = form.save()
+            messages.success(request, f'Category "{category.name}" updated successfully.')
             return redirect("category_list")
-        messages.error(request, "Category name is required.")
+        messages.error(request, form.errors.as_text())
 
     return render(
         request,
@@ -348,7 +372,8 @@ def category_delete(request, category_id):
 
 @login_required
 def inventory_list(request):
-    category_id = request.GET.get("category")
+    raw_category_id = (request.GET.get("category") or "").strip()
+    category_id = raw_category_id if raw_category_id.isdigit() else ""
     search = (request.GET.get("search") or "").strip()
 
     queryset = InventoryItem.objects.select_related("category").order_by("name")
@@ -393,38 +418,23 @@ def inventory_detail(request, item_id):
 
 @login_required
 def inventory_create(request):
+    form = InventoryItemForm(request.POST or None)
+
     if request.method == "POST":
-        name = (request.POST.get("name") or "").strip()
-        category_id = request.POST.get("category")
-        unit = (request.POST.get("unit") or "").strip()
-        quantity = request.POST.get("quantity", 0)
-        reorder_threshold = request.POST.get("reorder_threshold", 10)
-
-        try:
-            if not name or not category_id or not unit:
-                raise ValueError("Name, category, and unit are required.")
-
-            category = Category.objects.get(id=category_id)
-            item = InventoryItem.objects.create(
-                name=name,
-                category=category,
-                unit=unit,
-                quantity=float(quantity),
-                reorder_threshold=float(reorder_threshold),
-            )
-
-            if float(quantity) > 0:
+        if form.is_valid():
+            item = form.save()
+            if item.quantity > 0:
                 StockTransaction.objects.create(
                     item=item,
                     transaction_type="in",
-                    quantity=float(quantity),
+                    quantity=item.quantity,
                     note="Initial stock",
                 )
 
             messages.success(request, f"Item '{item.name}' created successfully.")
             return redirect("inventory_detail", item_id=item.id)
-        except Exception as error:
-            messages.error(request, f"Error creating item: {error}")
+
+        messages.error(request, form.errors.as_text())
 
     return render(
         request,
@@ -439,27 +449,15 @@ def inventory_create(request):
 @login_required
 def inventory_update(request, item_id):
     item = get_object_or_404(InventoryItem, id=item_id)
+    form = InventoryItemForm(request.POST or None, instance=item)
 
     if request.method == "POST":
-        name = (request.POST.get("name") or "").strip()
-        category_id = request.POST.get("category")
-        unit = (request.POST.get("unit") or "").strip()
-        reorder_threshold = request.POST.get("reorder_threshold", 10)
-
-        try:
-            if not name or not category_id or not unit:
-                raise ValueError("Name, category, and unit are required.")
-
-            item.name = name
-            item.category = Category.objects.get(id=category_id)
-            item.unit = unit
-            item.reorder_threshold = float(reorder_threshold)
-            item.save()
-
+        if form.is_valid():
+            item = form.save()
             messages.success(request, f"Item '{item.name}' updated successfully.")
             return redirect("inventory_detail", item_id=item.id)
-        except Exception as error:
-            messages.error(request, f"Error updating item: {error}")
+
+        messages.error(request, form.errors.as_text())
 
     return render(
         request,

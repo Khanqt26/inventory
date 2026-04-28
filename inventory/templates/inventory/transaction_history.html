@@ -29,7 +29,7 @@
       <tbody>
         {% for transaction in transactions %}
           <tr>
-            <td>{{ transaction.date|date:"M d, Y H:i" }}</td>
+            <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
             <td><span class="badge {% if transaction.transaction_type == 'in' %}badge-ok{% else %}badge-low{% endif %}">{{ transaction.get_transaction_type_display }}</span></td>
             <td>{{ transaction.item.name }}</td>
             <td>{{ transaction.quantity }} {{ transaction.item.unit }}</td>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -93,7 +93,7 @@
   .panel-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 12px; align-items: center; }
   .panel-title { font-family: "Syne", sans-serif; font-size: 16px; font-weight: 700; }
   .messages { margin-bottom: 18px; }
-  .message { padding: 13px 15px; border-radius: 12px; margin-bottom: 8px; font-size: 14px; font-weight: 500; }
+  .message { padding: 13px 15px; border-radius: 12px; margin-bottom: 8px; font-size: 14px; font-weight: 500; white-space: pre-line; }
   .message.success { background: var(--accent-soft); color: var(--accent-dark); }
   .message.error { background: var(--danger-soft); color: var(--danger); }
   .message.warning { background: var(--warning-soft); color: var(--warning); }
@@ -134,22 +134,22 @@
     </div>
     <div class="sidebar-scroll">
       <div class="nav-label">Overview</div>
-      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><span class="nav-icon">▦</span><span>Dashboard</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><span class="nav-icon">*</span><span>Dashboard</span></a>
       <div class="nav-label">Management</div>
-      <a class="nav-link {% if request.resolver_match.url_name == 'inventory_list' or request.resolver_match.url_name == 'inventory_detail' or request.resolver_match.url_name == 'inventory_create' or request.resolver_match.url_name == 'inventory_update' or request.resolver_match.url_name == 'inventory_delete' %}active{% endif %}" href="{% url 'inventory_list' %}"><span class="nav-icon">◫</span><span>Inventory</span></a>
-      <a class="nav-link {% if request.resolver_match.url_name == 'stock_in' %}active{% endif %}" href="{% url 'stock_in' %}"><span class="nav-icon">＋</span><span>Stock In</span></a>
-      <a class="nav-link {% if request.resolver_match.url_name == 'stock_out' %}active{% endif %}" href="{% url 'stock_out' %}"><span class="nav-icon">－</span><span>Stock Out</span></a>
-      <a class="nav-link {% if request.resolver_match.url_name == 'transaction_history' or request.resolver_match.url_name == 'item_transaction_history' %}active{% endif %}" href="{% url 'transaction_history' %}"><span class="nav-icon">↺</span><span>Transactions</span></a>
-      <a class="nav-link {% if request.resolver_match.url_name == 'category_list' or request.resolver_match.url_name == 'category_create' or request.resolver_match.url_name == 'category_update' or request.resolver_match.url_name == 'category_delete' %}active{% endif %}" href="{% url 'category_list' %}"><span class="nav-icon">◆</span><span>Categories</span></a>
-      <a class="nav-link {% if request.resolver_match.url_name == 'menu_items' or request.resolver_match.url_name == 'menu' %}active{% endif %}" href="{% url 'menu_items' %}"><span class="nav-icon">☰</span><span>Menu</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'inventory_list' or request.resolver_match.url_name == 'inventory_detail' or request.resolver_match.url_name == 'inventory_create' or request.resolver_match.url_name == 'inventory_update' or request.resolver_match.url_name == 'inventory_delete' %}active{% endif %}" href="{% url 'inventory_list' %}"><span class="nav-icon">&gt;</span><span>Inventory</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'stock_in' %}active{% endif %}" href="{% url 'stock_in' %}"><span class="nav-icon">+</span><span>Stock In</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'stock_out' %}active{% endif %}" href="{% url 'stock_out' %}"><span class="nav-icon">-</span><span>Stock Out</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'transaction_history' or request.resolver_match.url_name == 'item_transaction_history' %}active{% endif %}" href="{% url 'transaction_history' %}"><span class="nav-icon">R</span><span>Transactions</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'category_list' or request.resolver_match.url_name == 'category_create' or request.resolver_match.url_name == 'category_update' or request.resolver_match.url_name == 'category_delete' %}active{% endif %}" href="{% url 'category_list' %}"><span class="nav-icon">C</span><span>Categories</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'menu_items' or request.resolver_match.url_name == 'menu' %}active{% endif %}" href="{% url 'menu_items' %}"><span class="nav-icon">M</span><span>Menu</span></a>
       <div class="nav-label">Public</div>
-      <a class="nav-link {% if request.resolver_match.url_name == 'customer_menu' %}active{% endif %}" href="{% url 'customer_menu' %}"><span class="nav-icon">⌂</span><span>Customer View</span></a>
-      <a class="nav-link" href="{% url 'admin:index' %}"><span class="nav-icon">⚙</span><span>Django Admin</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'customer_menu' %}active{% endif %}" href="{% url 'customer_menu' %}"><span class="nav-icon">H</span><span>Customer View</span></a>
+      <a class="nav-link" href="{% url 'admin:index' %}"><span class="nav-icon">A</span><span>Django Admin</span></a>
     </div>
     <div class="sidebar-foot">
       <form method="post" action="{% url 'logout' %}" style="margin-bottom: 12px;">
         {% csrf_token %}
-        <button type="submit" class="logout-button"><span class="nav-icon">⇠</span><span>Logout</span></button>
+        <button type="submit" class="logout-button"><span class="nav-icon">L</span><span>Logout</span></button>
       </form>
       <div class="user-card">
         <div class="user-avatar">{{ request.user.username|default:"A"|slice:":1"|upper }}</div>

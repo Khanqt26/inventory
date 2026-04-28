@@ -1,5 +1,6 @@
-from django.db import models
+﻿from django.db import models
 from django.utils.text import slugify
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -8,7 +9,13 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name) or "category"
+            slug = base_slug
+            suffix = 2
+            while Category.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{suffix}"
+                suffix += 1
+            self.slug = slug
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -19,8 +26,8 @@ class InventoryItem(models.Model):
     name = models.CharField(max_length=100)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
     unit = models.CharField(max_length=20)
-    quantity = models.FloatField(default=0)
-    reorder_threshold = models.FloatField(default=10)
+    quantity = models.DecimalField(max_digits=10, decimal_places=3, default=0)
+    reorder_threshold = models.DecimalField(max_digits=10, decimal_places=3, default=10)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -34,14 +41,13 @@ class InventoryItem(models.Model):
 
 class StockTransaction(models.Model):
     TRANSACTION_TYPES = [
-        ('in', 'Stock In'),
-        ('out', 'Stock Out'),
+        ("in", "Stock In"),
+        ("out", "Stock Out"),
     ]
 
     item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
     transaction_type = models.CharField(max_length=3, choices=TRANSACTION_TYPES)
-    quantity = models.FloatField()
-    date = models.DateTimeField(auto_now_add=True)
+    quantity = models.DecimalField(max_digits=10, decimal_places=3)
     note = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -56,7 +62,7 @@ class MenuItem(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     is_available = models.BooleanField(default=True)
     linked_item = models.ForeignKey(InventoryItem, on_delete=models.SET_NULL, null=True, blank=True)
-    image = models.ImageField(upload_to='menu_images/', blank=True, null=True)
+    image = models.ImageField(upload_to="menu_images/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -66,7 +72,7 @@ class MenuItem(models.Model):
 class Recipe(models.Model):
     menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
     item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
-    quantity_used = models.FloatField()
+    quantity_used = models.DecimalField(max_digits=10, decimal_places=3)
 
     def __str__(self):
         return f"{self.menu_item.name} - {self.item.name} ({self.quantity_used})"
@@ -79,4 +85,4 @@ class Sale(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.menu_item.name} - {self.quantity} x ₱{self.total_price}"
+        return f"{self.menu_item.name} - {self.quantity} x PHP {self.total_price}"

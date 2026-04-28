@@ -68,11 +68,11 @@
     {% if page_obj.has_other_pages %}
       <div class="actions" style="justify-content:flex-end;padding:16px;">
         {% if page_obj.has_previous %}
-          <a class="btn btn-soft" href="?search={{ search_query }}&category={{ selected_category }}&page={{ page_obj.previous_page_number }}">Previous</a>
+          <a class="btn btn-soft" href="?search={{ search_query }}&category={{ selected_category|default_if_none:'' }}&page={{ page_obj.previous_page_number }}">Previous</a>
         {% endif %}
         <span class="btn btn-soft">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
         {% if page_obj.has_next %}
-          <a class="btn btn-soft" href="?search={{ search_query }}&category={{ selected_category }}&page={{ page_obj.next_page_number }}">Next</a>
+          <a class="btn btn-soft" href="?search={{ search_query }}&category={{ selected_category|default_if_none:'' }}&page={{ page_obj.next_page_number }}">Next</a>
         {% endif %}
       </div>
     {% endif %}

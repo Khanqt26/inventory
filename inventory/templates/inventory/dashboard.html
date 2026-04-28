@@ -32,6 +32,42 @@
     </div>
   </div>
 
+  <div class="panel" style="margin-bottom:16px;padding:18px;">
+    <div class="panel-header" style="padding:0 0 12px;border-bottom:1px solid var(--border);margin-bottom:14px;">
+      <div class="panel-title">Menu Orders (Overview)</div>
+      <a href="{% url 'menu_items' %}" class="btn btn-soft">Open Full Menu Page</a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;max-height:620px;overflow:auto;padding-right:4px;">
+      {% for item in menu_items %}
+        <div class="panel" style="overflow:hidden;">
+          <div style="height:180px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;">
+            {% if item.image %}
+              <img src="{{ item.image.url }}" alt="{{ item.name }}" style="width:100%;height:100%;object-fit:cover;">
+            {% else %}
+              <span style="font-size:48px;">*</span>
+            {% endif %}
+          </div>
+          <div style="padding:18px;">
+            <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;">{{ item.name }}</div>
+            <div class="muted" style="margin-top:4px;">{{ item.category.name }}</div>
+            <div style="margin-top:10px;line-height:1.6;">{{ item.description|default:"No description yet." }}</div>
+            <div style="margin-top:14px;font-size:22px;font-weight:800;color:var(--accent);">PHP {{ item.price }}</div>
+            <form method="post" action="{% url 'order' item.id %}" style="margin-top:14px;display:flex;gap:10px;">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{% url 'dashboard' %}">
+              <input type="number" name="quantity" value="1" min="1" style="max-width:84px;">
+              <button type="submit" class="btn btn-primary" style="flex:1;">Record Order</button>
+            </form>
+          </div>
+        </div>
+      {% empty %}
+        <div class="panel" style="padding:24px;">
+          <div class="muted">No menu items found.</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
   <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;align-items:start;">
     <div class="panel" style="overflow:auto;">
       <div class="panel-header">
@@ -55,7 +91,12 @@
               <td>{{ item.category.name|default:"Uncategorized" }}</td>
               <td>{{ item.quantity }}</td>
               <td><span class="badge badge-danger">Low Stock</span></td>
-              <td><a href="{% url 'restock_item' item.id %}" class="btn btn-primary">Restock +20</a></td>
+              <td>
+                <form method="post" action="{% url 'restock_item' item.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-primary">Restock +20</button>
+                </form>
+              </td>
             </tr>
           {% empty %}
             <tr>
@@ -76,7 +117,10 @@
           <a href="{% url 'stock_out' %}" class="btn btn-soft">Record Stock Out</a>
           <a href="{% url 'menu_items' %}" class="btn btn-soft">Open Menu Management</a>
           <a href="{% url 'customer_menu' %}" class="btn btn-soft">Preview Customer Menu</a>
-          <a href="{% url 'restock' %}" class="btn btn-primary">Restock All to 100</a>
+          <form method="post" action="{% url 'restock' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary" style="width:100%;">Restock All to 100</button>
+          </form>
         </div>
       </div>
 
@@ -106,4 +150,5 @@
       </div>
     </div>
   </div>
+
 {% endblock %}
