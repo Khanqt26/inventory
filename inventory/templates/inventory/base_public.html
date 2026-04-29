@@ -4,35 +4,100 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}Sidewalk & Refreshments{% endblock %}</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<script>
+  (function () {
+    var pageScrollY = 0;
+
+    document.addEventListener("htmx:beforeRequest", function () {
+      pageScrollY = window.scrollY || window.pageYOffset || 0;
+    });
+
+    document.addEventListener("htmx:afterSwap", function () {
+      window.scrollTo(0, pageScrollY);
+    });
+  })();
+</script>
 <style>
   :root {
     --bg:#f9f2ef; --surface:#ffffff; --border:#edd6d1; --text:#241616; --muted:#7f6767;
     --accent:#9f2f2f; --accent-dark:#7c2323; --accent-soft:#fde9e9; --radius:16px; --shadow:0 18px 44px rgba(54,22,22,0.08);
   }
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { background:linear-gradient(180deg, #fff8f6 0%, var(--bg) 100%); color:var(--text); font-family:"DM Sans",sans-serif; }
+  body { background:linear-gradient(180deg, #fff8f6 0%, var(--bg) 100%); color:var(--text); font-family:"Poppins", sans-serif; }
   .hero { padding:28px 24px 12px; border-bottom:1px solid var(--border); background:rgba(255,255,255,0.5); backdrop-filter:blur(10px); }
-  .hero-inner { max-width:1180px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
-  .brand { font-family:"Syne",sans-serif; font-size:28px; font-weight:800; }
+  .hero-inner { width:min(1400px, 100%); margin:0 auto; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+  .brand { font-family:"Outfit", sans-serif; font-size:28px; font-weight:800; }
   .sub { color:var(--muted); margin-top:6px; }
   .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 14px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); text-decoration:none; font-weight:600; }
   .btn-primary { background:var(--accent); border-color:var(--accent); color:#fff; }
-  .shell { max-width:1180px; margin:0 auto; padding:24px; }
+  .shell { width:min(1400px, 100%); margin:0 auto; padding:24px; }
+  .chips { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-start; margin-bottom:24px; }
+  .grid-auto-260 { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px; align-items:stretch; }
+  .menu-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); display:flex; flex-direction:column; }
+  .media-box { height:190px; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; }
+  .media-img { width:100%; height:100%; object-fit:cover; }
+  .icon-48 { font-size:48px; }
+  .card-body { padding:18px; display:flex; flex-direction:column; gap:6px; flex:1; }
+  .title-lg { font-family:"Outfit", sans-serif; font-size:20px; font-weight:700; line-height:1.25; }
+  .meta-caps { color:var(--muted); font-size:12px; letter-spacing:0.05em; text-transform:uppercase; margin-top:4px; }
+  .desc { color:var(--muted); line-height:1.6; margin-top:6px; min-height:52px; }
+  .row-between { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:auto; padding-top:12px; flex-wrap:wrap; }
+  .price { color:var(--accent); font-weight:800; font-size:22px; }
+  .pill { padding:5px 10px; border-radius:999px; background:var(--accent-soft); color:var(--accent-dark); font-size:12px; font-weight:700; white-space:nowrap; }
+  .pill-unavailable { background:#f3eceb; color:#8b6c6c; }
+  .empty-state { text-align:center; color:var(--muted); padding:56px 20px; }
+  .htmx-indicator {
+    position: fixed;
+    inset: 0;
+    background: rgba(36, 22, 22, 0.14);
+    backdrop-filter: blur(1px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+  .htmx-request .htmx-indicator,
+  .htmx-request.htmx-indicator {
+    display: flex;
+  }
+  .spinner {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.45);
+    border-top-color: #ffffff;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @media (max-width: 720px) {
+    .hero { padding:20px 16px 10px; }
+    .shell { padding:16px; }
+    .brand { font-size:24px; }
+    .grid-auto-260 { grid-template-columns:1fr; }
+  }
 </style>
 </head>
-<body>
+<body hx-boost="true" hx-target="#app-shell" hx-select="#app-shell" hx-swap="outerHTML transition:true" hx-push-url="true" hx-indicator="#global-loading">
+  <div id="global-loading" class="htmx-indicator" aria-hidden="true">
+    <div class="spinner"></div>
+  </div>
+  <div id="app-shell">
   <header class="hero">
     <div class="hero-inner">
       <div>
         <div class="brand">Sidewalk & Refreshments</div>
         <div class="sub">{% block hero_subtitle %}Fresh menu items and daily availability.{% endblock %}</div>
       </div>
-      <div><a href="{% url 'login' %}" class="btn btn-primary">Admin Login</a></div>
+      <div><a href="{% url 'login' %}" class="btn btn-primary" hx-boost="false">Admin Login</a></div>
     </div>
   </header>
   <div class="shell">
     {% block content %}{% endblock %}
+  </div>
   </div>
 </body>
 </html>

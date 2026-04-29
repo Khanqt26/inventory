@@ -9,11 +9,11 @@
 {% endblock %}
 
 {% block content %}
-  <div class="panel" style="max-width:720px;">
+  <div class="panel panel-narrow">
     <div class="panel-header">
       <div class="panel-title">Delete "{{ category.name }}"?</div>
     </div>
-    <div style="padding:20px;">
+    <div class="p-20">
       <div class="message warning">Make sure this category is no longer linked to menu or inventory items before deleting it.</div>
       <form method="post">
         {% csrf_token %}
@@ -25,3 +25,4 @@
     </div>
   </div>
 {% endblock %}
+

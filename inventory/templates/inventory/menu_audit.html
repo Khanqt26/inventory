@@ -1,0 +1,139 @@
+{% extends "inventory/base_admin.html" %}
+
+{% block title %}Menu Audit - Sidewalk & Refreshments{% endblock %}
+{% block eyebrow %}Quality Control{% endblock %}
+{% block page_title %}Menu Audit{% endblock %}
+{% block page_subtitle %}<div class="page-subtitle">Automatic checks for duplicate items, category coverage, variable pricing, and disabled menu entries.</div>{% endblock %}
+
+{% block content %}
+  <div class="metric-grid">
+    <div class="metric-card">
+      <div class="metric-label">Total Menu Items</div>
+      <div class="metric-value">{{ total_menu_items }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Total Categories</div>
+      <div class="metric-value">{{ total_categories }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Duplicate Name Pairs</div>
+      <div class="metric-value">{{ duplicates|length }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Unavailable Items</div>
+      <div class="metric-value">{{ unavailable_items|length }}</div>
+    </div>
+  </div>
+
+  <div class="grid-two-one">
+    <div class="stack-16">
+      <div class="panel panel-scroll">
+        <div class="panel-header">
+          <div class="panel-title">Duplicate Items</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Item Name</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in duplicates %}
+              <tr>
+                <td>{{ row.category__name|default:"Uncategorized" }}</td>
+                <td>{{ row.name }}</td>
+                <td><span class="badge badge-danger">{{ row.count }}</span></td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3" class="muted">No duplicate category+name pairs found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel panel-scroll">
+        <div class="panel-header">
+          <div class="panel-title">Range Price Items</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Item</th>
+              <th>Base Price</th>
+              <th>Range Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in range_price_items %}
+              <tr>
+                <td>{{ item.category.name|default:"Uncategorized" }}</td>
+                <td>{{ item.name }}</td>
+                <td>PHP {{ item.price }}</td>
+                <td>{{ item.description }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="muted">No variable/range price notes found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="stack-16">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Missing Required Categories</div>
+        </div>
+        <div class="p-18 stack-10">
+          {% for name in missing_required %}
+            <div class="card-soft"><strong>{{ name }}</strong></div>
+          {% empty %}
+            <div class="muted">All required categories are present.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Empty Categories</div>
+        </div>
+        <div class="p-18 stack-10">
+          {% for name in empty_categories %}
+            <div class="card-soft"><strong>{{ name }}</strong></div>
+          {% empty %}
+            <div class="muted">No empty categories found.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="panel panel-scroll">
+        <div class="panel-header">
+          <div class="panel-title">Unavailable Items</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Item</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in unavailable_items %}
+              <tr>
+                <td>{{ item.category.name|default:"Uncategorized" }}</td>
+                <td>{{ item.name }}</td>
+                <td>PHP {{ item.price }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3" class="muted">No unavailable items.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

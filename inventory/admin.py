@@ -1,6 +1,17 @@
 ﻿from django.contrib import admin
 
-from .models import Category, InventoryItem, MenuItem, Recipe, Sale, StockTransaction
+from .models import (
+    Category,
+    CustomerOrder,
+    CustomerOrderLine,
+    InventoryItem,
+    InventorySettings,
+    LowStockAlert,
+    MenuItem,
+    Recipe,
+    Sale,
+    StockTransaction,
+)
 
 
 @admin.register(Category)
@@ -45,3 +56,40 @@ class SaleAdmin(admin.ModelAdmin):
     list_filter = ["created_at", "menu_item"]
     search_fields = ["menu_item__name"]
     date_hierarchy = "created_at"
+
+
+@admin.register(InventorySettings)
+class InventorySettingsAdmin(admin.ModelAdmin):
+    list_display = ["low_stock_alerts_enabled", "default_reorder_threshold", "updated_at"]
+
+
+@admin.register(LowStockAlert)
+class LowStockAlertAdmin(admin.ModelAdmin):
+    list_display = [
+        "item",
+        "quantity_at_alert",
+        "threshold_at_alert",
+        "triggered_by",
+        "created_at",
+        "acknowledged_at",
+        "acknowledged_by",
+        "snoozed_until",
+        "snoozed_by",
+        "resolved_at",
+    ]
+    list_filter = ["created_at", "acknowledged_at", "snoozed_until", "resolved_at"]
+    search_fields = ["item__name", "triggered_by"]
+
+
+@admin.register(CustomerOrder)
+class CustomerOrderAdmin(admin.ModelAdmin):
+    list_display = ["order_number", "status", "payment_method", "total_amount", "created_by", "created_at"]
+    list_filter = ["status", "payment_method", "created_at"]
+    search_fields = ["order_number", "created_by__username"]
+
+
+@admin.register(CustomerOrderLine)
+class CustomerOrderLineAdmin(admin.ModelAdmin):
+    list_display = ["order", "menu_item", "quantity", "unit_price", "line_total"]
+    list_filter = ["menu_item"]
+    search_fields = ["order__order_number", "menu_item__name"]

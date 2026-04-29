@@ -10,23 +10,23 @@
 {% endblock %}
 
 {% block content %}
-  <div style="display:grid;grid-template-columns:320px 1fr;gap:16px;">
-    <div class="panel" style="padding:20px;">
-      <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;">Current Quantity</div>
-      <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;margin-top:8px;">{{ item.quantity }}</div>
-      <div style="margin-top:14px;">
+  <div class="grid-two-one">
+    <div class="panel p-20">
+      <div class="muted caps-xs">Current Quantity</div>
+      <div class="title-xl mt-6">{{ item.quantity }}</div>
+      <div class="mt-14">
         {% if item.is_low_stock %}
           <span class="badge badge-low">Low Stock</span>
         {% else %}
           <span class="badge badge-ok">Healthy</span>
         {% endif %}
       </div>
-      <div class="muted" style="margin-top:16px;">Reorder threshold: {{ item.reorder_threshold }}</div>
-      <div class="muted" style="margin-top:6px;">Created: {{ item.created_at|date:"M d, Y H:i" }}</div>
-      <div class="muted" style="margin-top:6px;">Updated: {{ item.updated_at|date:"M d, Y H:i" }}</div>
+      <div class="muted mt-16">Reorder threshold: {{ item.reorder_threshold }}</div>
+      <div class="muted mt-6">Created: {{ item.created_at|date:"M d, Y H:i" }}</div>
+      <div class="muted mt-6">Updated: {{ item.updated_at|date:"M d, Y H:i" }}</div>
     </div>
 
-    <div class="panel" style="overflow:auto;">
+    <div class="panel panel-scroll">
       <div class="panel-header">
         <div class="panel-title">Recent Transactions</div>
       </div>
@@ -57,3 +57,5 @@
     </div>
   </div>
 {% endblock %}
+
+

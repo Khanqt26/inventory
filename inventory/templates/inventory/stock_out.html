@@ -9,11 +9,11 @@
 {% endblock %}
 
 {% block content %}
-  <div class="panel" style="max-width:720px;">
+  <div class="panel panel-narrow">
     <div class="panel-header">
       <div class="panel-title">Remove Inventory</div>
     </div>
-    <div style="padding:20px;">
+    <div class="p-20">
       <form method="post">
         {% csrf_token %}
         <div class="field">
@@ -41,3 +41,4 @@
     </div>
   </div>
 {% endblock %}
+

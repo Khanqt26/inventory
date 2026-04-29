@@ -9,18 +9,18 @@
 {% endblock %}
 
 {% block content %}
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;">
+  <div class="grid-auto-260">
     {% for category in categories %}
-      <div class="panel" style="padding:20px;">
-        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;">{{ category.name }}</div>
-        <div class="muted" style="margin-top:6px;">{{ category.menuitem_set.count }} menu item{{ category.menuitem_set.count|pluralize }}</div>
-        <div class="actions" style="margin-top:14px;">
+      <div class="panel p-20">
+        <div class="title-lg">{{ category.name }}</div>
+        <div class="muted mt-6">{{ category.menuitem_set.count }} menu item{{ category.menuitem_set.count|pluralize }}</div>
+        <div class="actions mt-14">
           <a href="{% url 'category_update' category.id %}" class="btn btn-soft">Edit</a>
           <a href="{% url 'category_delete' category.id %}" class="btn btn-danger">Delete</a>
         </div>
       </div>
     {% empty %}
-      <div class="panel" style="padding:24px;">
+      <div class="panel p-24">
         <div class="muted">No categories yet. Create your first one to organize the system.</div>
       </div>
     {% endfor %}

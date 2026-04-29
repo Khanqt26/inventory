@@ -1,0 +1,67 @@
+{% extends "inventory/base_admin.html" %}
+
+{% block title %}Stock Count Adjustment - Sidewalk & Refreshments{% endblock %}
+{% block eyebrow %}Inventory Movement{% endblock %}
+{% block page_title %}Stock Count Adjustment{% endblock %}
+{% block page_subtitle %}<div class="page-subtitle">Enter physical counts to align system quantity with real-world stock.</div>{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'inventory_list' %}" class="btn btn-soft">Back to Inventory</a>
+{% endblock %}
+
+{% block content %}
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Physical Count Input</div>
+    </div>
+    <div class="p-18">
+      <div class="message warning">
+        Enter only items you counted. Blank values are ignored. Each difference creates an automatic Stock In/Out transaction with note "Physical Count Adjustment".
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="field">
+          <label for="adjustment_note">Batch Note (optional)</label>
+          <input id="adjustment_note" name="adjustment_note" type="text" placeholder="e.g. April monthly inventory count">
+        </div>
+        <div class="panel panel-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Unit</th>
+                <th>Current Qty</th>
+                <th>Actual Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in items %}
+                <tr>
+                  <td><strong>{{ item.name }}</strong><br><span class="muted">{{ item.category.name|default:"Uncategorized" }}</span></td>
+                  <td>{{ item.unit }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>
+                    <input
+                      type="number"
+                      step="0.001"
+                      min="0"
+                      name="actual_{{ item.id }}"
+                      placeholder="{{ item.quantity }}"
+                      style="max-width:140px;"
+                    >
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4" class="muted">No inventory items available.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="actions mt-16">
+          <button type="submit" class="btn btn-primary">Apply Count Adjustment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

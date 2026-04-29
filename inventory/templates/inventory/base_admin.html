@@ -1,10 +1,31 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}Sidewalk & Refreshments{% endblock %}</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<script>
+  (function () {
+    var pageScrollY = 0;
+    var sidebarScrollTop = 0;
+
+    document.addEventListener("htmx:beforeRequest", function () {
+      pageScrollY = window.scrollY || window.pageYOffset || 0;
+      var sidebar = document.querySelector(".sidebar-scroll");
+      sidebarScrollTop = sidebar ? sidebar.scrollTop : 0;
+    });
+
+    document.addEventListener("htmx:afterSwap", function () {
+      window.scrollTo(0, pageScrollY);
+      var sidebar = document.querySelector(".sidebar-scroll");
+      if (sidebar) {
+        sidebar.scrollTop = sidebarScrollTop;
+      }
+    });
+  })();
+</script>
 <style>
   :root {
     --bg: #f9f2ef;
@@ -30,7 +51,10 @@
   body {
     background: linear-gradient(180deg, #fff8f6 0%, var(--bg) 100%);
     color: var(--text);
-    font-family: "DM Sans", sans-serif;
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+  }
+  #app-shell {
     min-height: 100vh;
     display: flex;
   }
@@ -47,10 +71,10 @@
   .sidebar-head { padding: 28px 22px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); }
   .logo-mark {
     width: 42px; height: 42px; border-radius: 12px; background: var(--accent); color: #fff;
-    display: flex; align-items: center; justify-content: center; font-family: "Syne", sans-serif;
+    display: flex; align-items: center; justify-content: center; font-family: "Outfit", sans-serif;
     font-size: 18px; font-weight: 800; margin-bottom: 12px;
   }
-  .brand-title { font-family: "Syne", sans-serif; font-size: 15px; font-weight: 700; line-height: 1.25; color: #fff; }
+  .brand-title { font-family: "Outfit", sans-serif; font-size: 15px; font-weight: 700; line-height: 1.25; color: #fff; }
   .brand-subtitle { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-top: 4px; }
   .sidebar-scroll { flex: 1; overflow: auto; padding: 18px 12px 16px; }
   .nav-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.32); padding: 12px 12px 8px; }
@@ -77,7 +101,7 @@
     border-bottom: 1px solid var(--border); padding: 18px 28px; display: flex; justify-content: space-between; gap: 16px; align-items: center;
   }
   .page-eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 4px; }
-  .page-title { font-family: "Syne", sans-serif; font-size: 24px; font-weight: 800; color: var(--text); }
+  .page-title { font-family: "Outfit", sans-serif; font-size: 24px; font-weight: 800; color: var(--text); }
   .page-subtitle { color: var(--muted); font-size: 14px; margin-top: 4px; }
   .topbar-actions, .actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .content { padding: 26px 28px 36px; }
@@ -91,7 +115,7 @@
   .btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
   .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
   .panel-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 12px; align-items: center; }
-  .panel-title { font-family: "Syne", sans-serif; font-size: 16px; font-weight: 700; }
+  .panel-title { font-family: "Outfit", sans-serif; font-size: 16px; font-weight: 700; }
   .messages { margin-bottom: 18px; }
   .message { padding: 13px 15px; border-radius: 12px; margin-bottom: 8px; font-size: 14px; font-weight: 500; white-space: pre-line; }
   .message.success { background: var(--accent-soft); color: var(--accent-dark); }
@@ -111,11 +135,84 @@
   .badge-ok { background: var(--accent-soft); color: var(--accent-dark); }
   .badge-low { background: var(--warning-soft); color: var(--warning); }
   .badge-danger { background: var(--danger-soft); color: var(--danger); }
+  .badge-nav { margin-left: auto; }
   .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
   .metric-card { padding: 18px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
   .metric-label { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-  .metric-value { font-family: "Syne", sans-serif; font-size: 30px; font-weight: 800; }
+  .metric-value { font-family: "Outfit", sans-serif; font-size: 30px; font-weight: 800; }
   .muted { color: var(--muted); }
+  .mt-4 { margin-top: 4px; }
+  .mt-6 { margin-top: 6px; }
+  .mt-10 { margin-top: 10px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-14 { margin-top: 14px; }
+  .mt-16 { margin-top: 16px; }
+  .p-12 { padding: 12px; }
+  .p-18 { padding: 18px; }
+  .p-20 { padding: 20px; }
+  .p-24 { padding: 24px; }
+  .panel-narrow { max-width: 720px; }
+  .panel-medium { max-width: 760px; }
+  .panel-scroll { overflow: auto; }
+  .panel-clip { overflow: hidden; }
+  .grid-auto-260 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .grid-two-one { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; align-items: start; }
+  .grid-filter { display: grid; grid-template-columns: 1fr 220px auto; gap: 12px; }
+  .row-filter { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; }
+  .stack-16 { display: grid; gap: 16px; }
+  .stack-10 { display: grid; gap: 10px; }
+  .min-w-240 { min-width: 240px; }
+  .mb-0 { margin-bottom: 0; }
+  .title-lg { font-family: "Outfit", sans-serif; font-size: 20px; font-weight: 700; }
+  .title-xl { font-family: "Outfit", sans-serif; font-size: 36px; font-weight: 800; }
+  .value-xl { font-size: 22px; font-weight: 800; color: var(--accent); }
+  .media-box {
+    height: 180px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center;
+  }
+  .media-img { width: 100%; height: 100%; object-fit: cover; }
+  .icon-48 { font-size: 48px; }
+  .desc { margin-top: 10px; line-height: 1.6; }
+  .inline-form { margin-top: 14px; display: flex; gap: 10px; }
+  .qty-input { max-width: 84px; }
+  .grow { flex: 1; }
+  .actions-end { align-items: end; }
+  .actions-right { justify-content: flex-end; padding: 16px; }
+  .caps-xs { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .card-soft { padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); }
+  .row-between { display: flex; justify-content: space-between; gap: 12px; }
+  .logout-form { margin-bottom: 12px; }
+  .panel-header-flat { padding: 0 0 12px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+  .panel-orders { margin-bottom: 16px; padding: 18px; }
+  .menu-scroll { max-height: 620px; overflow: auto; padding-right: 4px; }
+  .w-full { width: 100%; }
+  .htmx-indicator {
+    position: fixed;
+    inset: 0;
+    background: rgba(36, 22, 22, 0.14);
+    backdrop-filter: blur(1px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+  .htmx-request .htmx-indicator,
+  .htmx-request.htmx-indicator {
+    display: flex;
+  }
+  .spinner {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.45);
+    border-top-color: #ffffff;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @media (max-width: 1120px) {
+    .grid-two-one { grid-template-columns: 1fr; }
+  }
   @media (max-width: 920px) {
     .sidebar { position: static; width: 100%; }
     body { display: block; }
@@ -125,7 +222,11 @@
   }
 </style>
 </head>
-<body>
+<body hx-boost="true" hx-target="#app-shell" hx-select="#app-shell" hx-swap="outerHTML transition:true" hx-push-url="true" hx-indicator="#global-loading">
+  <div id="global-loading" class="htmx-indicator" aria-hidden="true">
+    <div class="spinner"></div>
+  </div>
+  <div id="app-shell">
   <aside class="sidebar">
     <div class="sidebar-head">
       <div class="logo-mark">S</div>
@@ -135,19 +236,22 @@
     <div class="sidebar-scroll">
       <div class="nav-label">Overview</div>
       <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><span class="nav-icon">*</span><span>Dashboard</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'cashier_pos' or request.resolver_match.url_name == 'cashier_cart_add' or request.resolver_match.url_name == 'cashier_cart_update' or request.resolver_match.url_name == 'cashier_cart_remove' or request.resolver_match.url_name == 'cashier_checkout' %}active{% endif %}" href="{% url 'cashier_pos' %}"><span class="nav-icon">$</span><span>Cashier POS</span></a>
       <div class="nav-label">Management</div>
-      <a class="nav-link {% if request.resolver_match.url_name == 'inventory_list' or request.resolver_match.url_name == 'inventory_detail' or request.resolver_match.url_name == 'inventory_create' or request.resolver_match.url_name == 'inventory_update' or request.resolver_match.url_name == 'inventory_delete' %}active{% endif %}" href="{% url 'inventory_list' %}"><span class="nav-icon">&gt;</span><span>Inventory</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'inventory_list' or request.resolver_match.url_name == 'inventory_detail' or request.resolver_match.url_name == 'inventory_create' or request.resolver_match.url_name == 'inventory_update' or request.resolver_match.url_name == 'inventory_delete' %}active{% endif %}" href="{% url 'inventory_list' %}"><span class="nav-icon">&gt;</span><span>Inventory</span>{% if global_low_stock_count %}<span class="badge badge-danger badge-nav">{{ global_low_stock_count }}</span>{% endif %}</a>
       <a class="nav-link {% if request.resolver_match.url_name == 'stock_in' %}active{% endif %}" href="{% url 'stock_in' %}"><span class="nav-icon">+</span><span>Stock In</span></a>
       <a class="nav-link {% if request.resolver_match.url_name == 'stock_out' %}active{% endif %}" href="{% url 'stock_out' %}"><span class="nav-icon">-</span><span>Stock Out</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'stock_count_adjustment' %}active{% endif %}" href="{% url 'stock_count_adjustment' %}"><span class="nav-icon">#</span><span>Stock Count</span></a>
       <a class="nav-link {% if request.resolver_match.url_name == 'transaction_history' or request.resolver_match.url_name == 'item_transaction_history' %}active{% endif %}" href="{% url 'transaction_history' %}"><span class="nav-icon">R</span><span>Transactions</span></a>
       <a class="nav-link {% if request.resolver_match.url_name == 'category_list' or request.resolver_match.url_name == 'category_create' or request.resolver_match.url_name == 'category_update' or request.resolver_match.url_name == 'category_delete' %}active{% endif %}" href="{% url 'category_list' %}"><span class="nav-icon">C</span><span>Categories</span></a>
-      <a class="nav-link {% if request.resolver_match.url_name == 'menu_items' or request.resolver_match.url_name == 'menu' %}active{% endif %}" href="{% url 'menu_items' %}"><span class="nav-icon">M</span><span>Menu</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'inventory_settings' %}active{% endif %}" href="{% url 'inventory_settings' %}"><span class="nav-icon">S</span><span>Settings</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'menu_audit' %}active{% endif %}" href="{% url 'menu_audit' %}"><span class="nav-icon">!</span><span>Menu Audit</span></a>
       <div class="nav-label">Public</div>
-      <a class="nav-link {% if request.resolver_match.url_name == 'customer_menu' %}active{% endif %}" href="{% url 'customer_menu' %}"><span class="nav-icon">H</span><span>Customer View</span></a>
-      <a class="nav-link" href="{% url 'admin:index' %}"><span class="nav-icon">A</span><span>Django Admin</span></a>
+      <a class="nav-link {% if request.resolver_match.url_name == 'customer_menu' %}active{% endif %}" href="{% url 'customer_menu' %}" hx-boost="false"><span class="nav-icon">H</span><span>Customer View</span></a>
+      <a class="nav-link" href="{% url 'admin:index' %}" hx-boost="false"><span class="nav-icon">A</span><span>Django Admin</span></a>
     </div>
     <div class="sidebar-foot">
-      <form method="post" action="{% url 'logout' %}" style="margin-bottom: 12px;">
+      <form method="post" action="{% url 'logout' %}" class="logout-form">
         {% csrf_token %}
         <button type="submit" class="logout-button"><span class="nav-icon">L</span><span>Logout</span></button>
       </form>
@@ -181,5 +285,9 @@
       {% block content %}{% endblock %}
     </div>
   </main>
+  </div>
 </body>
 </html>
+
+
+

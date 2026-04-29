@@ -13,63 +13,27 @@
     <div class="metric-card">
       <div class="metric-label">Total Sales</div>
       <div class="metric-value">PHP {{ total_sales }}</div>
-      <div class="muted" style="margin-top:6px;">Combined recorded sales value.</div>
+      <div class="muted mt-6">Combined recorded sales value.</div>
     </div>
     <div class="metric-card">
       <div class="metric-label">Low Stock Items</div>
       <div class="metric-value">{{ low_items|length }}</div>
-      <div class="muted" style="margin-top:6px;">Items at or below reorder level.</div>
+      <div class="muted mt-6">Items at or below reorder level.</div>
     </div>
     <div class="metric-card">
       <div class="metric-label">Total Inventory Items</div>
       <div class="metric-value">{{ all_items|length }}</div>
-      <div class="muted" style="margin-top:6px;">Tracked stock records in the system.</div>
+      <div class="muted mt-6">Tracked stock records in the system.</div>
     </div>
     <div class="metric-card">
       <div class="metric-label">Stock Health</div>
       <div class="metric-value">{{ low_stock_percentage }}%</div>
-      <div class="muted" style="margin-top:6px;">Attention score based on low-stock count.</div>
+      <div class="muted mt-6">Attention score based on low-stock count.</div>
     </div>
   </div>
 
-  <div class="panel" style="margin-bottom:16px;padding:18px;">
-    <div class="panel-header" style="padding:0 0 12px;border-bottom:1px solid var(--border);margin-bottom:14px;">
-      <div class="panel-title">Menu Orders (Overview)</div>
-      <a href="{% url 'menu_items' %}" class="btn btn-soft">Open Full Menu Page</a>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;max-height:620px;overflow:auto;padding-right:4px;">
-      {% for item in menu_items %}
-        <div class="panel" style="overflow:hidden;">
-          <div style="height:180px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;">
-            {% if item.image %}
-              <img src="{{ item.image.url }}" alt="{{ item.name }}" style="width:100%;height:100%;object-fit:cover;">
-            {% else %}
-              <span style="font-size:48px;">*</span>
-            {% endif %}
-          </div>
-          <div style="padding:18px;">
-            <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;">{{ item.name }}</div>
-            <div class="muted" style="margin-top:4px;">{{ item.category.name }}</div>
-            <div style="margin-top:10px;line-height:1.6;">{{ item.description|default:"No description yet." }}</div>
-            <div style="margin-top:14px;font-size:22px;font-weight:800;color:var(--accent);">PHP {{ item.price }}</div>
-            <form method="post" action="{% url 'order' item.id %}" style="margin-top:14px;display:flex;gap:10px;">
-              {% csrf_token %}
-              <input type="hidden" name="next" value="{% url 'dashboard' %}">
-              <input type="number" name="quantity" value="1" min="1" style="max-width:84px;">
-              <button type="submit" class="btn btn-primary" style="flex:1;">Record Order</button>
-            </form>
-          </div>
-        </div>
-      {% empty %}
-        <div class="panel" style="padding:24px;">
-          <div class="muted">No menu items found.</div>
-        </div>
-      {% endfor %}
-    </div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;align-items:start;">
-    <div class="panel" style="overflow:auto;">
+  <div class="grid-two-one">
+    <div class="panel panel-scroll">
       <div class="panel-header">
         <div class="panel-title">Low Stock Inventory</div>
         <a href="{% url 'inventory_list' %}" class="btn btn-soft">View All Inventory</a>
@@ -107,20 +71,64 @@
       </table>
     </div>
 
-    <div style="display:grid;gap:16px;">
+    <div class="stack-16">
       <div class="panel">
         <div class="panel-header">
           <div class="panel-title">Quick Actions</div>
         </div>
-        <div style="padding:18px;display:grid;gap:10px;">
+        <div class="p-18 stack-16">
+          <a href="{% url 'cashier_pos' %}" class="btn btn-primary">Open Cashier POS</a>
           <a href="{% url 'stock_in' %}" class="btn btn-soft">Record Stock In</a>
           <a href="{% url 'stock_out' %}" class="btn btn-soft">Record Stock Out</a>
-          <a href="{% url 'menu_items' %}" class="btn btn-soft">Open Menu Management</a>
-          <a href="{% url 'customer_menu' %}" class="btn btn-soft">Preview Customer Menu</a>
+          <a href="{% url 'customer_menu' %}" class="btn btn-soft" hx-boost="false">Preview Customer Menu</a>
           <form method="post" action="{% url 'restock' %}">
             {% csrf_token %}
-            <button type="submit" class="btn btn-primary" style="width:100%;">Restock All to 100</button>
+            <button type="submit" class="btn btn-primary w-full">Restock All to 100</button>
           </form>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Low Stock Alerts</div>
+          <div class="actions">
+            <a href="{% url 'dashboard' %}?alert_view=active" class="btn {% if alert_view == 'active' %}btn-primary{% else %}btn-soft{% endif %}">Active</a>
+            <a href="{% url 'dashboard' %}?alert_view=snoozed" class="btn {% if alert_view == 'snoozed' %}btn-primary{% else %}btn-soft{% endif %}">Snoozed</a>
+            <a href="{% url 'dashboard' %}?alert_view=acknowledged" class="btn {% if alert_view == 'acknowledged' %}btn-primary{% else %}btn-soft{% endif %}">Acknowledged</a>
+            <a href="{% url 'inventory_settings' %}" class="btn btn-soft">Alert Settings</a>
+          </div>
+        </div>
+        <div class="p-18 stack-10">
+          {% for row in recent_low_stock_alerts %}
+            <div class="card-soft">
+              <div class="row-between">
+                <strong>{{ row.alert.item.name }}</strong>
+                <span class="badge badge-danger">Alert</span>
+              </div>
+              <div class="muted mt-6">
+                {{ row.alert.item.quantity }} / {{ row.alert.threshold_at_alert }} {{ row.alert.item.unit }}
+                | {{ row.alert.created_at|date:"M d, Y H:i" }}
+              </div>
+              <div class="mt-6">Recommended restock: <strong>{{ row.recommended_restock }} {{ row.alert.item.unit }}</strong></div>
+              {% if row.alert.triggered_by %}
+                <div class="muted mt-6">Triggered by: {{ row.alert.triggered_by }}</div>
+              {% endif %}
+              <div class="actions mt-10">
+                <form method="post" action="{% url 'acknowledge_low_stock_alert' row.alert.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{% url 'dashboard' %}?alert_view={{ alert_view }}">
+                  <button type="submit" class="btn btn-soft">Acknowledge</button>
+                </form>
+                <form method="post" action="{% url 'snooze_low_stock_alert' row.alert.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{% url 'dashboard' %}?alert_view={{ alert_view }}">
+                  <button type="submit" class="btn btn-soft">Snooze 24h</button>
+                </form>
+              </div>
+            </div>
+          {% empty %}
+            <div class="muted">No alerts found for this filter.</div>
+          {% endfor %}
         </div>
       </div>
 
@@ -129,18 +137,18 @@
           <div class="panel-title">Recent Transactions</div>
           <a href="{% url 'transaction_history' %}" class="btn btn-soft">See Full History</a>
         </div>
-        <div style="padding:18px;display:grid;gap:10px;">
+        <div class="p-18 stack-10">
           {% for transaction in recent_transactions %}
-            <div style="padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface-soft);">
-              <div style="display:flex;justify-content:space-between;gap:12px;">
+            <div class="card-soft">
+              <div class="row-between">
                 <strong>{{ transaction.item.name }}</strong>
                 <span class="badge {% if transaction.transaction_type == 'in' %}badge-ok{% else %}badge-low{% endif %}">
                   {{ transaction.get_transaction_type_display }}
                 </span>
               </div>
-              <div class="muted" style="margin-top:6px;">{{ transaction.quantity }} {{ transaction.item.unit }} | {{ transaction.created_at|date:"M d, Y H:i" }}</div>
+              <div class="muted mt-6">{{ transaction.quantity }} {{ transaction.item.unit }} | {{ transaction.created_at|date:"M d, Y H:i" }}</div>
               {% if transaction.note %}
-                <div style="margin-top:6px;">{{ transaction.note }}</div>
+                <div class="mt-6">{{ transaction.note }}</div>
               {% endif %}
             </div>
           {% empty %}
@@ -148,7 +156,35 @@
           {% endfor %}
         </div>
       </div>
+
+      {% if alert_view != "acknowledged" %}
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Acknowledged Alerts</div>
+          </div>
+          <div class="p-18 stack-10">
+            {% for alert in acknowledged_alerts %}
+              <div class="card-soft">
+                <div class="row-between">
+                  <strong>{{ alert.item.name }}</strong>
+                  <span class="badge badge-ok">Acknowledged</span>
+                </div>
+                <div class="muted mt-6">
+                  {{ alert.quantity_at_alert }} / {{ alert.threshold_at_alert }} {{ alert.item.unit }}
+                  | {{ alert.acknowledged_at|date:"M d, Y H:i" }}
+                </div>
+                <div class="muted mt-6">
+                  By: {{ alert.acknowledged_by.username|default:"Unknown user" }}
+                </div>
+              </div>
+            {% empty %}
+              <div class="muted">No acknowledged alerts yet.</div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
     </div>
   </div>
 
 {% endblock %}
+

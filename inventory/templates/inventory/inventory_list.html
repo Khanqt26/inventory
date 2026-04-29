@@ -9,12 +9,12 @@
 {% endblock %}
 
 {% block content %}
-  <form method="get" class="panel" style="padding:18px;margin-bottom:16px;display:grid;grid-template-columns:1fr 220px auto;gap:12px;">
-    <div class="field" style="margin-bottom:0;">
+  <form method="get" class="panel p-18 mt-16 grid-filter">
+    <div class="field">
       <label for="search">Search</label>
       <input id="search" type="text" name="search" value="{{ search_query }}" placeholder="Search inventory items">
     </div>
-    <div class="field" style="margin-bottom:0;">
+    <div class="field">
       <label for="category">Category</label>
       <select id="category" name="category">
         <option value="">All categories</option>
@@ -23,14 +23,14 @@
         {% endfor %}
       </select>
     </div>
-    <div class="actions" style="align-items:end;">
+    <div class="actions actions-end">
       <button class="btn btn-primary" type="submit">Apply Filters</button>
     </div>
   </form>
 
-  <div class="muted" style="margin-bottom:12px;">Showing {{ items|length }} item{{ items|length|pluralize }} on this page. Low stock matches: {{ low_stock_count }}.</div>
+  <div class="muted mt-12">Showing {{ items|length }} item{{ items|length|pluralize }} on this page. Low stock matches: {{ low_stock_count }}.</div>
 
-  <div class="panel" style="overflow:auto;">
+  <div class="panel panel-scroll">
     <table>
       <thead>
         <tr>
@@ -66,7 +66,7 @@
       </tbody>
     </table>
     {% if page_obj.has_other_pages %}
-      <div class="actions" style="justify-content:flex-end;padding:16px;">
+      <div class="actions actions-right">
         {% if page_obj.has_previous %}
           <a class="btn btn-soft" href="?search={{ search_query }}&category={{ selected_category|default_if_none:'' }}&page={{ page_obj.previous_page_number }}">Previous</a>
         {% endif %}
@@ -78,3 +78,5 @@
     {% endif %}
   </div>
 {% endblock %}
+
+

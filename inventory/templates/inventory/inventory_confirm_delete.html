@@ -9,11 +9,11 @@
 {% endblock %}
 
 {% block content %}
-  <div class="panel" style="max-width:720px;">
+  <div class="panel panel-narrow">
     <div class="panel-header">
       <div class="panel-title">Confirm Deletion</div>
     </div>
-    <div style="padding:20px;">
+    <div class="p-20">
       <div class="message warning">This action removes the item record. Review linked reports before deleting if you still need its history.</div>
       <form method="post">
         {% csrf_token %}
@@ -24,3 +24,4 @@
     </div>
   </div>
 {% endblock %}
+

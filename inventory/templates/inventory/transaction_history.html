@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block content %}
-  <div class="panel" style="overflow:auto;">
+  <div class="panel panel-scroll">
     <div class="panel-header">
       <div class="panel-title">Transactions</div>
       <a href="{% url 'stock_in' %}" class="btn btn-soft">Record Movement</a>
@@ -44,3 +44,4 @@
     </table>
   </div>
 {% endblock %}
+

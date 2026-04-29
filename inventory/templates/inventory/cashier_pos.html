@@ -1,0 +1,165 @@
+{% extends "inventory/base_admin.html" %}
+
+{% block title %}Cashier POS - Sidewalk & Refreshments{% endblock %}
+{% block eyebrow %}Point Of Sale{% endblock %}
+{% block page_title %}Cashier POS{% endblock %}
+{% block page_subtitle %}<div class="page-subtitle">Fast order entry with cart checkout and automatic inventory deduction.</div>{% endblock %}
+
+{% block content %}
+  <div class="grid-two-one">
+    <div>
+      <div class="panel p-18 row-filter" style="margin-bottom:16px;">
+        <a href="{% url 'cashier_pos' %}?availability={{ availability_filter }}&status={{ status_filter }}" class="btn {% if not selected_category %}btn-primary{% else %}btn-soft{% endif %}">All</a>
+        {% for category in categories %}
+          <a href="{% url 'cashier_pos' %}?category={{ category.id }}&availability={{ availability_filter }}&status={{ status_filter }}" class="btn {% if selected_category and selected_category.id == category.id %}btn-primary{% else %}btn-soft{% endif %}">{{ category.name }}</a>
+        {% endfor %}
+      </div>
+
+      <div class="panel p-18 row-filter" style="margin-bottom:16px;">
+        <strong class="muted">Visibility</strong>
+        <a href="{% url 'cashier_pos' %}?availability=available{% if selected_category %}&category={{ selected_category.id }}{% endif %}&status={{ status_filter }}" class="btn {% if availability_filter == 'available' %}btn-primary{% else %}btn-soft{% endif %}">Available</a>
+        <a href="{% url 'cashier_pos' %}?availability=unavailable{% if selected_category %}&category={{ selected_category.id }}{% endif %}&status={{ status_filter }}" class="btn {% if availability_filter == 'unavailable' %}btn-primary{% else %}btn-soft{% endif %}">Unavailable</a>
+        <a href="{% url 'cashier_pos' %}?availability=all{% if selected_category %}&category={{ selected_category.id }}{% endif %}&status={{ status_filter }}" class="btn {% if availability_filter == 'all' %}btn-primary{% else %}btn-soft{% endif %}">All</a>
+      </div>
+
+      <div class="grid-auto-260">
+        {% for item in items %}
+          <div class="panel panel-clip">
+            <div class="media-box">
+              {% if item.image %}
+                <img src="{{ item.image.url }}" alt="{{ item.name }}" class="media-img">
+              {% else %}
+                <span class="icon-48">&#9749;</span>
+              {% endif %}
+            </div>
+            <div class="p-18">
+              <div class="title-lg">{{ item.name }}</div>
+              <div class="muted mt-4">{{ item.category.name }}</div>
+              <div class="value-xl mt-10">PHP {{ item.price }}</div>
+              <div class="stack-10 mt-10">
+                {% if item.is_available %}
+                  <form method="post" action="{% url 'cashier_cart_add' item.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit" class="btn btn-primary w-full">Add To Cart</button>
+                  </form>
+                {% else %}
+                  <button type="button" class="btn btn-soft w-full" disabled>Unavailable</button>
+                {% endif %}
+                <form method="post" action="{% url 'cashier_toggle_item_availability' item.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                  {% if item.is_available %}
+                    <button type="submit" class="btn btn-danger w-full">Mark Unavailable</button>
+                  {% else %}
+                    <button type="submit" class="btn btn-soft w-full">Mark Available</button>
+                  {% endif %}
+                </form>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="panel p-24"><div class="muted">No menu items available.</div></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="stack-16">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Current Cart</div>
+        </div>
+        <div class="p-18 stack-10">
+          {% for row in cart_rows %}
+            <div class="card-soft">
+              <div class="row-between">
+                <strong>{{ row.menu_item.name }}</strong>
+                <strong>PHP {{ row.line_total }}</strong>
+              </div>
+              <form method="post" action="{% url 'cashier_cart_update' row.menu_item.id %}" class="inline-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <input type="number" min="0" name="quantity" value="{{ row.quantity }}" class="qty-input">
+                <button type="submit" class="btn btn-soft">Update</button>
+              </form>
+              <form method="post" action="{% url 'cashier_cart_remove' row.menu_item.id %}" class="mt-10">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button type="submit" class="btn btn-danger">Remove</button>
+              </form>
+            </div>
+          {% empty %}
+            <div class="muted">Cart is empty.</div>
+          {% endfor %}
+          <div class="row-between" style="padding-top:8px;">
+            <strong>Total</strong>
+            <strong>PHP {{ cart_total }}</strong>
+          </div>
+          <form method="post" action="{% url 'cashier_checkout' %}" class="stack-10">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <div class="field mb-0">
+              <label for="payment_method">Payment Method</label>
+              <select name="payment_method" id="payment_method">
+                <option value="cash">Cash</option>
+                <option value="card">Card</option>
+                <option value="ewallet">E-Wallet</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-full">Checkout</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Recent POS Orders</div>
+          <div class="actions">
+            <a href="{% url 'cashier_pos' %}?status=all{% if selected_category %}&category={{ selected_category.id }}{% endif %}&availability={{ availability_filter }}" class="btn {% if status_filter == 'all' %}btn-primary{% else %}btn-soft{% endif %}">All</a>
+            <a href="{% url 'cashier_pos' %}?status=pending{% if selected_category %}&category={{ selected_category.id }}{% endif %}&availability={{ availability_filter }}" class="btn {% if status_filter == 'pending' %}btn-primary{% else %}btn-soft{% endif %}">Pending</a>
+            <a href="{% url 'cashier_pos' %}?status=preparing{% if selected_category %}&category={{ selected_category.id }}{% endif %}&availability={{ availability_filter }}" class="btn {% if status_filter == 'preparing' %}btn-primary{% else %}btn-soft{% endif %}">Preparing</a>
+            <a href="{% url 'cashier_pos' %}?status=served{% if selected_category %}&category={{ selected_category.id }}{% endif %}&availability={{ availability_filter }}" class="btn {% if status_filter == 'served' %}btn-primary{% else %}btn-soft{% endif %}">Served</a>
+          </div>
+        </div>
+        <div class="p-18 stack-10">
+          {% for order in recent_orders %}
+            <div class="card-soft">
+              <div class="row-between">
+                <strong>{{ order.order_number }}</strong>
+                <span class="badge {% if order.status == 'served' %}badge-ok{% elif order.status == 'preparing' %}badge-low{% else %}badge-danger{% endif %}">{{ order.get_status_display }}</span>
+              </div>
+              <div class="muted mt-6">PHP {{ order.total_amount }} | {{ order.get_payment_method_display }}</div>
+              <div class="muted mt-6">{{ order.created_at|date:"M d, Y H:i" }}</div>
+              <div class="actions mt-10">
+                {% if order.status == 'pending' %}
+                  <form method="post" action="{% url 'cashier_order_status_update' order.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="preparing">
+                    <input type="hidden" name="next" value="{% url 'cashier_pos' %}?status={{ status_filter }}&availability={{ availability_filter }}{% if selected_category %}&category={{ selected_category.id }}{% endif %}">
+                    <button type="submit" class="btn btn-soft">Start Preparing</button>
+                  </form>
+                {% elif order.status == 'preparing' %}
+                  <form method="post" action="{% url 'cashier_order_status_update' order.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="served">
+                    <input type="hidden" name="next" value="{% url 'cashier_pos' %}?status={{ status_filter }}&availability={{ availability_filter }}{% if selected_category %}&category={{ selected_category.id }}{% endif %}">
+                    <button type="submit" class="btn btn-primary">Mark Served</button>
+                  </form>
+                {% else %}
+                  <form method="post" action="{% url 'cashier_order_status_update' order.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="pending">
+                    <input type="hidden" name="next" value="{% url 'cashier_pos' %}?status={{ status_filter }}&availability={{ availability_filter }}{% if selected_category %}&category={{ selected_category.id }}{% endif %}">
+                    <button type="submit" class="btn btn-soft">Reopen</button>
+                  </form>
+                {% endif %}
+              </div>
+            </div>
+          {% empty %}
+            <div class="muted">No POS orders yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

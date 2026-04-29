@@ -9,11 +9,11 @@
 {% endblock %}
 
 {% block content %}
-  <div class="panel" style="max-width:760px;">
+  <div class="panel panel-medium">
     <div class="panel-header">
       <div class="panel-title">{% if action == 'create' %}Item Information{% else %}Update Item Information{% endif %}</div>
     </div>
-    <div style="padding:20px;">
+    <div class="p-20">
       <form method="post">
         {% csrf_token %}
         <div class="field">
@@ -54,3 +54,4 @@
     </div>
   </div>
 {% endblock %}
+
