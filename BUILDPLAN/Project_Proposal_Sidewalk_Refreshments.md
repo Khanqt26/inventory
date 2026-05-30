@@ -1,7 +1,7 @@
 # Project Proposal
 **Project Title:** Sidewalk & Refreshments Integrated POS and Inventory Management System  
 **Prepared For:** Sidewalk & Refreshments  
-**Prepared By:** [Khan L. Adjarani]  
+**Prepared By:** [Your Name / Team]  
 **Date:** April 29, 2026
 
 ## 1. Executive Summary

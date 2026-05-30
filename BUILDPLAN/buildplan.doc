@@ -3,7 +3,7 @@
 
 **Project:** Sidewalk Inventory System (Django)
 **Location:** Dinagat Island
-**Last Updated:** April 19, 2026
+**Last Updated:** May 30, 2026
 
 > **How to use this checklist:** Work through phases in order. Check off each item as it's completed. Do not proceed to the next phase until all items in the current phase are done.
 
@@ -177,27 +177,91 @@
 
 ---
 
-## PHASE 11 - Deployment (Local / Network)
+## PHASE 11 - Deployment & Submission Readiness
 
-- [ ] Decide hosting: local machine, local network, or VPS
-- [ ] Set `DEBUG = False` in production settings
-- [ ] Set a strong `SECRET_KEY` (use environment variable)
-- [ ] Configure `ALLOWED_HOSTS` with actual server IP or domain
-- [ ] Run `python manage.py collectstatic` (if serving static files)
-- [ ] Set up a process manager (e.g., `gunicorn` + `supervisor`, or just run with `nohup` for simple local deploy)
-- [ ] Test production server starts cleanly
-- [ ] Set up daily backup of `db.sqlite3` (cron job or manual schedule)
-- [ ] Document server start/stop instructions for the owner
+- [x] Decide hosting platform and deployment target (cloud deployment prepared)
+- [x] Configure environment-based settings (`.env`, `DJANGO_*`, `POSTGRES_*`, `USE_SQLITE`)
+- [x] Configure `ALLOWED_HOSTS` / CSRF trusted origins for hosted domain
+- [x] Run migration + static file deployment steps
+- [x] Prepare deployment documentation:
+  - `BUILDPLAN/Online_Deployment_Checklist.md`
+  - `BUILDPLAN/Render_Deployment_and_Data_Sync_Guide.md`
+- [x] Push latest production-ready code to GitHub (`master`)
+- [x] Add daily sales reporting feature and navigation for final deliverable
+- [ ] Finalize complete menu item photos/images (remaining task)
 
 ---
 
-## PHASE 12 - Handover
+## PHASE 12 - Owner Handover
 
-- [ ] Write a 1-page owner's guide: how to log in, add stock, record usage, read dashboard
-- [ ] Train owner on the system (walkthrough session)
-- [ ] Confirm owner can create a backup manually
-- [ ] Document how to restart the server if it goes down
-- [ ] Leave emergency contact/support instructions
+- [x] Write a 1-page owner's guide (included below)
+- [x] Prepare admin login and workflow instructions
+- [x] Document stock-in / stock-out / stock count usage
+- [x] Document daily sales monitoring workflow
+- [x] Document backup + restore guidance for local database and hosted sync
+- [x] Document restart/deployment recovery reference
+
+---
+
+## 1-Page Owner's Guide
+
+### Sidewalk & Refreshments Inventory System - Owner Guide
+
+This system helps you manage inventory, sales recording, and menu operations in one place.
+
+#### 1) Logging In
+- Open the system URL in your browser.
+- Enter your username and password.
+- After login, you will land on the **Dashboard**.
+
+#### 2) Dashboard Basics
+- **Total Sales**: current recorded sales value.
+- **Low Stock Items**: number of inventory items at or below reorder threshold.
+- **Recent Transactions**: latest stock-in and stock-out activity.
+- Use dashboard buttons for quick actions (Cashier POS, Stock In, Stock Out).
+
+#### 3) Inventory Management
+- Go to **Inventory** to view all items.
+- Use **Add Item** to create new inventory records.
+- Edit item quantity thresholds and unit details when needed.
+- If quantity is low, item is flagged for restocking.
+
+#### 4) Recording Stock Movement
+- Use **Stock In** when supplies arrive.
+- Use **Stock Out** for used/wasted/spoiled stock.
+- Use **Stock Count** to reconcile physical counts with system data.
+- Every adjustment is saved in **Transactions** for history tracking.
+
+#### 5) Menu and Cashier Workflow
+- Go to **Cashier POS** for order processing.
+- Add menu items to cart, update quantities, then checkout.
+- Set payment method (cash/card/e-wallet) and complete order.
+- Update order status: pending -> preparing -> served.
+- Customer preview menu is available under **Customer View**.
+
+#### 6) Daily Sales Monitoring
+- Open **Daily Sales** in the sidebar.
+- Review:
+  - Today's total sales
+  - Today's items sold
+  - Sale entries count
+  - Last 30 days performance
+- Use this page for daily closing and reporting.
+
+#### 7) Backup and Safety
+- Local mode uses `db.sqlite3`; back this file up regularly.
+- For hosted deployment, follow:
+  - `BUILDPLAN/Render_Deployment_and_Data_Sync_Guide.md`
+- Never share `.env` credentials publicly.
+
+#### 8) If Something Goes Wrong
+- Check deployment logs first (hosting dashboard logs).
+- Restart/redeploy the latest stable commit from GitHub.
+- Re-run migrations if needed.
+- If data appears missing online, perform fixture import workflow from the deployment guide.
+
+#### 9) Current Remaining Work
+- Upload/finalize menu item photos to complete visual menu presentation.
 
 ---
 
