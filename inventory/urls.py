@@ -16,6 +16,7 @@ urlpatterns = [
     path('cashier/checkout/', views.cashier_checkout, name='cashier_checkout'),
     path('cashier/order/<int:order_id>/status/', views.cashier_order_status_update, name='cashier_order_status_update'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('sales/daily/', views.daily_sales, name='daily_sales'),
     path('restock/', views.restock_all, name='restock'),
     path('restock-item/<int:item_id>/', views.restock_item, name='restock_item'),
     path('alerts/<int:alert_id>/acknowledge/', views.acknowledge_low_stock_alert, name='acknowledge_low_stock_alert'),

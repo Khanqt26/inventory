@@ -1,0 +1,84 @@
+{% extends "inventory/base_admin.html" %}
+
+{% block title %}Daily Sales - Sidewalk & Refreshments{% endblock %}
+{% block eyebrow %}Sales{% endblock %}
+{% block page_title %}Daily Sales{% endblock %}
+{% block page_subtitle %}<div class="page-subtitle">Track today's performance and review the last 30 days of sales totals.</div>{% endblock %}
+
+{% block content %}
+  <div class="metric-grid">
+    <div class="metric-card">
+      <div class="metric-label">Date</div>
+      <div class="metric-value">{{ today|date:"M d, Y" }}</div>
+      <div class="muted mt-6">Current local day summary.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Today's Sales</div>
+      <div class="metric-value">PHP {{ today_summary.total_sales|default:0 }}</div>
+      <div class="muted mt-6">Total sales recorded today.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Items Sold</div>
+      <div class="metric-value">{{ today_summary.total_items|default:0 }}</div>
+      <div class="muted mt-6">Combined quantity sold today.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Sale Entries</div>
+      <div class="metric-value">{{ today_summary.total_orders|default:0 }}</div>
+      <div class="muted mt-6">Number of recorded sale rows today.</div>
+    </div>
+  </div>
+
+  <div class="grid-two-one">
+    <div class="panel panel-scroll">
+      <div class="panel-header">
+        <div class="panel-title">Last 30 Days</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Total Sales</th>
+            <th>Items Sold</th>
+            <th>Sale Entries</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in daily_rows %}
+            <tr>
+              <td>{{ row.sale_date|date:"M d, Y" }}</td>
+              <td>PHP {{ row.total_sales|default:0 }}</td>
+              <td>{{ row.total_items|default:0 }}</td>
+              <td>{{ row.total_orders|default:0 }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4" class="muted">No sales records yet.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Recent Sales</div>
+      </div>
+      <div class="p-18 stack-10">
+        {% for sale in recent_sales %}
+          <div class="card-soft">
+            <div class="row-between">
+              <strong>{{ sale.menu_item.name }}</strong>
+              <span class="badge badge-ok">PHP {{ sale.total_price }}</span>
+            </div>
+            <div class="muted mt-6">
+              Qty: {{ sale.quantity }} | {{ sale.created_at|date:"M d, Y H:i" }}
+            </div>
+          </div>
+        {% empty %}
+          <div class="muted">No sales recorded yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

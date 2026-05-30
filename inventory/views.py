@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
+from django.db.models.functions import TruncDate
 from django.db.models import Count, F, Sum
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -222,6 +223,45 @@ def dashboard(request):
             "recent_low_stock_alerts": recent_low_stock_alerts,
             "acknowledged_alerts": acknowledged_alerts,
             "alert_view": alert_view,
+        },
+    )
+
+
+@login_required
+def daily_sales(request):
+    sales_qs = Sale.objects.select_related("menu_item").order_by("-created_at")
+    today = localdate()
+
+    daily_rows = (
+        sales_qs.annotate(sale_date=TruncDate("created_at"))
+        .values("sale_date")
+        .annotate(
+            total_sales=Sum("total_price"),
+            total_items=Sum("quantity"),
+            total_orders=Count("id"),
+        )
+        .order_by("-sale_date")
+    )
+
+    today_summary = next((row for row in daily_rows if row["sale_date"] == today), None)
+    if not today_summary:
+        today_summary = {
+            "sale_date": today,
+            "total_sales": Decimal("0"),
+            "total_items": 0,
+            "total_orders": 0,
+        }
+
+    recent_sales = sales_qs[:20]
+
+    return render(
+        request,
+        "inventory/daily_sales.html",
+        {
+            "today_summary": today_summary,
+            "daily_rows": daily_rows[:30],
+            "recent_sales": recent_sales,
+            "today": today,
         },
     )
 
