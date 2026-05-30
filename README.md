@@ -114,6 +114,13 @@ python manage.py migrate
 python manage.py collectstatic --noinput
 ```
 
+## Documentation Structure
+
+- `README.md` - main project guide (setup, features, routes)
+- `BUILDPLAN/README.md` - index of planning/deployment docs
+- `BUILDPLAN/Render_Deployment_and_Data_Sync_Guide.md` - deployment + data sync workflow
+- `BUILDPLAN/Online_Deployment_Checklist.md` - pre-demo/pre-submission deployment checklist
+
 ## Project Status
 
 Current branch includes Daily Sales reporting update:
@@ -130,4 +137,3 @@ For academic submission:
 ## License
 
 This project is for educational use.
-

@@ -8,4 +8,5 @@ staticfiles/
 .env
 .env.*
 *.log
-
+runserver.out.txt
+runserver.err.txt
